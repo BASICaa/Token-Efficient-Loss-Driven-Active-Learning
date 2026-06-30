@@ -1,0 +1,21 @@
+round_id,records,avg_loss,min_loss,max_loss,generated_records,recycled_records,top_tags
+0,10,2.4889691352844237,0.747154176235199,4.974152088165283,10,0,assistant_qa:2; extractive_qa:1; reasoning:1; time_reasoning:1; paraphrase:1
+1,10,0.9412908827885985,0.001756366342306137,3.1164965629577637,7,3,assistant_qa:2; contextual_qa:2; math_qa:1; extractive_qa:1; paraphrase:1
+2,10,0.5454978107009083,0.001139375614002347,1.9734528064727783,7,3,assistant_qa:3; contextual_qa:2; reasoning:1; paraphrase:1; classification:1
+3,10,0.44794158060103656,0.0065416498109698296,1.409208059310913,7,3,assistant_qa:3; contextual_qa:2; time_reasoning:1; classification:1; structured_text_task:1
+4,10,0.3616530911065638,0.01272010151296854,0.790193498134613,7,3,assistant_qa:3; contextual_qa:2; extractive_qa:1; time_reasoning:1; structured_text_task:1
+5,10,0.2550830981461331,0.003573163179680705,0.686890721321106,7,3,assistant_qa:3; contextual_qa:2; extractive_qa:1; math_qa:1; science_qa:1
+6,10,0.19987204102799297,0.0035166791640222073,0.5747045874595642,7,3,assistant_qa:4; contextual_qa:2; extractive_qa:1; time_reasoning:1; math_qa:1
+7,10,0.15132324846927075,0.0009689601138234138,0.34943363070487976,7,3,assistant_qa:3; contextual_qa:2; classification:1; science_qa:1; paraphrase:1
+8,10,0.20754095115698873,0.007669264916330576,0.5855530500411987,7,3,time_reasoning:3; assistant_qa:3; factual_qa:1; reasoning:1; contextual_qa:1
+9,10,0.13720664381980896,0.010818084701895714,0.43219831585884094,7,3,time_reasoning:2; math_qa:1; assistant_qa:1; extractive_qa:1; factual_qa:1
+10,10,0.20072868107818068,0.006976317148655653,0.747277021408081,7,3,assistant_qa:3; contextual_qa:2; factual_qa:1; time_reasoning:1; classification:1
+11,10,0.2741766209481284,0.003312589367851615,0.818854808807373,7,3,assistant_qa:4; contextual_qa:2; time_reasoning:1; reasoning:1; structured_text_task:1
+12,10,0.12351117860525847,0.005507041700184345,0.42291438579559326,7,3,assistant_qa:3; structured_text_task:2; contextual_qa:2; factual_qa:1; math_qa:1
+13,10,0.13806067388504745,0.01632140763103962,0.4001694917678833,7,3,assistant_qa:4; paraphrase:1; science_qa:1; factual_qa:1; math_qa:1
+14,10,0.15074795186519624,0.009567469358444214,0.3068176805973053,7,3,science_qa:3; assistant_qa:2; classification:1; factual_qa:1; time_reasoning:1
+15,10,0.13780937648843974,0.0037797277327626944,0.3953112065792084,7,3,assistant_qa:3; contextual_qa:2; classification:1; structured_text_task:1; factual_qa:1
+16,10,0.1391677660634741,0.0026355094742029905,0.6996777653694153,7,3,assistant_qa:3; math_qa:2; paraphrase:1; factual_qa:1; contextual_qa:1
+17,10,0.2380963304080069,0.002067319583147764,0.822721004486084,7,3,assistant_qa:2; math_qa:2; extractive_qa:1; time_reasoning:1; science_qa:1
+18,10,0.23487627697177232,0.0026010307483375072,0.5510046482086182,7,3,assistant_qa:4; contextual_qa:2; paraphrase:1; structured_text_task:1; time_reasoning:1
+19,10,0.2425767378648743,0.003085700562223792,0.7966270446777344,7,3,assistant_qa:4; contextual_qa:2; reasoning:1; structured_text_task:1; extractive_qa:1

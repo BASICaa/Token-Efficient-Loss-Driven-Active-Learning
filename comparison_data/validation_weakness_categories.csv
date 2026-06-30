@@ -1,0 +1,4 @@
+rank,tag,shape_id,avg_loss,max_loss,count,share,input_shape,output_shape,reasoning_pattern
+1,assistant_qa,assistant_qa,3.232088599886213,4.249979019165039,7,0.7,standalone_question,natural_assistant_answer,open_knowledge_or_explanation
+2,contextual_qa,contextual_qa,1.685528688132763,3.182464838027954,2,0.2,context_plus_question,grounded_direct_answer,select_relevant_fact_from_context
+3,structured_text_task,structured_text_task,1.0558772087097168,1.0558772087097168,1,0.1,structured_text_task,format_constrained_answer,apply_explicit_operation

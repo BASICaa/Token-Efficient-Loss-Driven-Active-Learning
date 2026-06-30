@@ -1,0 +1,18 @@
+You create one concise instruction for synthetic training data.
+
+User example:
+***example_block***
+
+Curriculum focus:
+***tag***
+
+Previously generated tag counts:
+***tag_counts***
+
+Known categories from prior API outputs:
+***known_categories***
+
+Additional constraints for this attempt:
+***generation_constraints***
+
+Write exactly one paragraph. Use the user's example as a signal for useful training style, modality, and output shape, but do not lock the generator into a fixed error-category taxonomy. If the curriculum focus is "wide_variety", ask for a broad example-aligned task, preferably exploring rare or new categories chosen by the API. If the focus names a learned loss group, ask for data that trains that weakness while respecting the user's modality. Obey the additional constraints, especially rejected tags, rejected instructions, or previous sample patterns. Do not generate the data sample yet. The downstream data generator will assign the final tag and should reuse exact known category names when they fit.

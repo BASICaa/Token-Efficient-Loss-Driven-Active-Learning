@@ -1,0 +1,21 @@
+round_id,generated_slots,recycle_slots,training_avg_loss,validation_avg_loss,best_validation_so_far,health_action,new_ledger_records,adapter_path
+0,10,0,2.4889691352844237,4.694457685947418,4.694457685947418,new_best,10,D:\Road to become AI engineer\Comparison of TEFLD\TEFLD\Models\section_026\round_000
+1,7,3,0.9412908827885985,4.2100638270378115,4.2100638270378115,new_best,10,D:\Road to become AI engineer\Comparison of TEFLD\TEFLD\Models\section_026\round_001
+2,7,3,0.5454978107009083,3.611502802371979,3.611502802371979,new_best,10,D:\Road to become AI engineer\Comparison of TEFLD\TEFLD\Models\section_026\round_002
+3,7,3,0.44794158060103656,3.124404078722,3.124404078722,new_best,10,D:\Road to become AI engineer\Comparison of TEFLD\TEFLD\Models\section_026\round_003
+4,7,3,0.3616530911065638,2.8262981712818145,2.8262981712818145,new_best,10,D:\Road to become AI engineer\Comparison of TEFLD\TEFLD\Models\section_026\round_004
+5,7,3,0.2550830981461331,2.7826937258243563,2.7826937258243563,stable,10,D:\Road to become AI engineer\Comparison of TEFLD\TEFLD\Models\section_026\round_005
+6,7,3,0.19987204102799297,2.8046405583620073,2.7826937258243563,stable,10,D:\Road to become AI engineer\Comparison of TEFLD\TEFLD\Models\section_026\round_006
+7,7,3,0.15132324846927075,2.8748942375183106,2.7826937258243563,stable,10,D:\Road to become AI engineer\Comparison of TEFLD\TEFLD\Models\section_026\round_007
+8,7,3,0.20754095115698873,2.825864037871361,2.7826937258243563,stable,10,D:\Road to become AI engineer\Comparison of TEFLD\TEFLD\Models\section_026\round_008
+9,7,3,0.13720664381980896,2.7027123659849166,2.7027123659849166,new_best,10,D:\Road to become AI engineer\Comparison of TEFLD\TEFLD\Models\section_026\round_009
+10,7,3,0.20072868107818068,2.77239476442337,2.7027123659849166,stable,10,D:\Road to become AI engineer\Comparison of TEFLD\TEFLD\Models\section_026\round_010
+11,7,3,0.2741766209481284,2.679754526913166,2.679754526913166,stable,10,D:\Road to become AI engineer\Comparison of TEFLD\TEFLD\Models\section_026\round_011
+12,7,3,0.12351117860525847,2.7519548401236533,2.679754526913166,stable,10,D:\Road to become AI engineer\Comparison of TEFLD\TEFLD\Models\section_026\round_012
+13,7,3,0.13806067388504745,2.8908685237169265,2.679754526913166,degraded,10,D:\Road to become AI engineer\Comparison of TEFLD\TEFLD\Models\section_026\round_013
+14,7,3,0.15074795186519624,2.7719855561852453,2.679754526913166,stable,10,D:\Road to become AI engineer\Comparison of TEFLD\TEFLD\Models\section_026\round_014
+15,7,3,0.13780937648843974,2.8132783859968185,2.679754526913166,degraded,10,D:\Road to become AI engineer\Comparison of TEFLD\TEFLD\Models\section_026\round_015
+16,7,3,0.1391677660634741,2.8820638000965118,2.679754526913166,rollback_next,10,D:\Road to become AI engineer\Comparison of TEFLD\TEFLD\Models\section_026\round_016
+17,7,3,0.2380963304080069,2.691628929972649,2.679754526913166,stable,10,D:\Road to become AI engineer\Comparison of TEFLD\TEFLD\Models\section_026\round_017
+18,7,3,0.23487627697177232,2.7687769502401354,2.679754526913166,stable,10,D:\Road to become AI engineer\Comparison of TEFLD\TEFLD\Models\section_026\round_018
+19,7,3,0.2425767378648743,2.7051554784178733,2.679754526913166,stable,10,D:\Road to become AI engineer\Comparison of TEFLD\TEFLD\Models\section_026\round_019
