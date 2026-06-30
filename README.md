@@ -4,6 +4,14 @@ TEFLD is a prototype active-learning loop for improving a local language model w
 
 Instead of training on random data, TEFLD uses model loss to decide what to train next. Each round builds a 10-sample batch, trains a LoRA adapter, evaluates the student, records failures, and uses those failures to shape the next round.
 
+## Why Loss-Driven Active Learning?
+
+TEFLD is meant to spend training tokens where the student is weakest. The included comparison snapshot shows the loop rapidly reducing its own generated-curriculum training loss and improving shared validation loss through the early rounds, with the best validation checkpoint at round `9` (`2.7027` shared validation loss). On the broader holdout set, TEFLD's best checkpoint reached `3.1823` average loss versus `2.2175` for the dataset baseline, which suggests the loop learned its targeted curriculum but did not fully cover the wider Dolly-style distribution.
+
+![TEFLD comparison dashboard](comparison_data/dashboard.png)
+
+See [comparison_data/README.md](comparison_data/README.md) for the compact comparison summary, CSV tables, dashboard image, and Excel workbook.
+
 ## What This Repository Contains
 
 This repository is the standalone TEFLD project only.
@@ -54,6 +62,8 @@ Ledger + failure vault
 Next round
 ```
 
+For the detailed resumable runner behavior, see [ORCHESTRATOR.md](ORCHESTRATOR.md).
+
 ## Repository Layout
 
 ```text
@@ -90,7 +100,7 @@ Next round
 
 ## Setup
 
-Create and activate an environment:
+Create and activate an environment on Windows PowerShell:
 
 ```powershell
 python -m venv .venv
@@ -99,9 +109,18 @@ python -m pip install --upgrade pip
 pip install -r requirements.txt
 ```
 
+Or on macOS/Linux:
+
+```bash
+python3 -m venv .venv
+source .venv/bin/activate
+python -m pip install --upgrade pip
+pip install -r requirements.txt
+```
+
 Or with conda:
 
-```powershell
+```bash
 conda create -n tefld python=3.11
 conda activate tefld
 pip install -r requirements.txt
@@ -113,6 +132,12 @@ Create your local environment file:
 Copy-Item .env.example .env
 ```
 
+On macOS/Linux:
+
+```bash
+cp .env.example .env
+```
+
 Then edit `.env`:
 
 ```env
@@ -120,7 +145,15 @@ OPENAI_API_KEY=your_api_key_here
 BASE_MODEL_DIR=D:\path\to\local\models
 ```
 
-`BASE_MODEL_DIR` is optional if you pass a full model path with `--student-model-id`.
+For macOS/Linux, `BASE_MODEL_DIR` should use your local path style, for example:
+
+```env
+BASE_MODEL_DIR=/path/to/local/models
+```
+
+TEFLD expects you to bring a local Hugging Face-compatible causal language model; model weights are not downloaded or included in this repository. `BASE_MODEL_DIR` is optional if you pass a full model path with `--student-model-id`.
+
+Known configured/tested local target: `gemma-4-E2B-it`, which is the default `--student-model-id` and the model family the current LoRA target-module logic is tuned around. Other causal LM families may work, but you may need to adjust the LoRA target modules in [TEFLD/src/student.py](TEFLD/src/student.py) and retune rank, alpha, learning rate, epochs, and sequence length for your model size.
 
 ## Quick Start
 
@@ -185,6 +218,12 @@ Use a local model path:
 python run_tefld.py --student-model-id "D:\hugginghub\hub\gemma-4-E2B-it" --rounds 1
 ```
 
+On macOS/Linux:
+
+```bash
+python run_tefld.py --student-model-id "/path/to/huggingface/gemma-4-E2B-it" --rounds 1
+```
+
 Disable API semantic grouping in policy:
 
 ```powershell
@@ -243,6 +282,8 @@ The `comparison_data/` folder is intentionally small and GitHub-friendly. GitHub
 
 ## Minimal Run Checklist
 
+Windows PowerShell:
+
 ```powershell
 git clone <your-repo-url>
 cd "Token efficient loss driven active learning"
@@ -250,6 +291,19 @@ python -m venv .venv
 .\.venv\Scripts\Activate.ps1
 pip install -r requirements.txt
 Copy-Item .env.example .env
+python run_tefld.py --new-section --bootstrap-only
+python run_tefld.py --rounds 1
+```
+
+macOS/Linux:
+
+```bash
+git clone <your-repo-url>
+cd "Token efficient loss driven active learning"
+python3 -m venv .venv
+source .venv/bin/activate
+pip install -r requirements.txt
+cp .env.example .env
 python run_tefld.py --new-section --bootstrap-only
 python run_tefld.py --rounds 1
 ```
