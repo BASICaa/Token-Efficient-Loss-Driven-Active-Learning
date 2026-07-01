@@ -142,6 +142,15 @@ def is_gemma4_model_id(model_id: str | Path) -> bool:
     return "gemma-4" in normalized or "gemma4" in normalized
 
 
+def default_num_train_epochs() -> float:
+    raw_value = os.environ.get("TEFLD_NUM_TRAIN_EPOCHS", "1")
+    try:
+        value = float(raw_value)
+    except ValueError:
+        return 1.0
+    return value if value > 0 else 1.0
+
+
 class TrainyModel:
     """
     Student model connector.
@@ -151,10 +160,22 @@ class TrainyModel:
     Heavy ML dependencies are imported only by train/evaluate/generation paths.
     """
 
-    def __init__(self, model_name: str = DEFAULT_MODEL_ID, *, expected_batch_size: int | None = EXPECTED_BATCH_SIZE, max_length: int = DEFAULT_MAX_LENGTH) -> None:
+    def __init__(
+        self,
+        model_name: str = DEFAULT_MODEL_ID,
+        *,
+        expected_batch_size: int | None = EXPECTED_BATCH_SIZE,
+        max_length: int = DEFAULT_MAX_LENGTH,
+        num_train_epochs: float | None = None,
+    ) -> None:
         self.model_id = model_name
         self.expected_batch_size = expected_batch_size
         self.max_length = max_length
+        self.num_train_epochs = (
+            default_num_train_epochs()
+            if num_train_epochs is None
+            else num_train_epochs
+        )
 
         self.section_id: str = ensure_current_section()
         self.pipeline: Pipeline_State = sync_learning_tag_counts_from_ledger(
@@ -371,6 +392,7 @@ class TrainyModel:
         )["input_ids"]
         encoded = tokenizer(
             full_text,
+            add_special_tokens=False,
             max_length=max_length,
             padding="max_length",
             truncation=True,
@@ -540,7 +562,7 @@ class TrainyModel:
             per_device_train_batch_size=1,
             gradient_accumulation_steps=4,
             learning_rate=2e-4,
-            num_train_epochs=3,
+            num_train_epochs=self.num_train_epochs,
             logging_steps=1,
             save_strategy="no",
             bf16=use_bf16,
@@ -676,6 +698,9 @@ class TrainyModel:
             tag=sample.tag,
             source=sample.source,
             source_ledger_id=sample.source_ledger_id,
+            requested_difficulty=sample.requested_difficulty,
+            observed_difficulty=sample.observed_difficulty,
+            difficulty_score=sample.difficulty_score,
         )
 
     def evaluate_samples(

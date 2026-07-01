@@ -46,6 +46,15 @@ from .policy import (
     focused_generation_slot_count,
 )
 from .student import ADAPTER_COMPLETE_FILENAME, TrainyModel
+from .validation import (
+    DEFAULT_SHARED_VALIDATION_SIZE,
+    average_validation_loss,
+    build_validation_weakness_profile,
+    ensure_shared_validation_samples,
+    evaluate_shared_validation_samples,
+    get_shared_validation_path,
+    load_shared_validation_samples,
+)
 
 
 EXAMPLE_FILENAME = "example.txt"
@@ -111,6 +120,9 @@ class Orchestrator:
         use_api_grouping: bool = True,
         interactive_section_selection: bool = False,
         example_format: ExampleFormat = "auto",
+        use_shared_validation: bool = True,
+        shared_validation_size: int = DEFAULT_SHARED_VALIDATION_SIZE,
+        num_train_epochs: float | None = None,
     ) -> None:
         batch_size = validate_instructor_recipe_size(batch_size)
         self.example_format = self.validate_example_format(example_format)
@@ -126,6 +138,9 @@ class Orchestrator:
         self.instructor_model_id = instructor_model_id
         self.batch_size = batch_size
         self.use_api_grouping = use_api_grouping
+        self.use_shared_validation = use_shared_validation
+        self.shared_validation_size = shared_validation_size
+        self.num_train_epochs = num_train_epochs
         self.last_round_health: dict[str, Any] | None = None
 
     @staticmethod
@@ -214,6 +229,9 @@ class Orchestrator:
         setup_result = self.prepare_example_state()
         if setup_result is not None:
             return setup_result
+
+        if evaluate and not build_only and self.use_shared_validation:
+            self.ensure_shared_validation_set()
 
         completed_rounds = 0
         last_adapter_path: Path | None = None
@@ -445,7 +463,10 @@ class Orchestrator:
         *,
         keep_model: bool = True,
     ) -> tuple[Path, TrainyModel]:
-        student = TrainyModel(self.student_model_id)
+        student = TrainyModel(
+            self.student_model_id,
+            num_train_epochs=self.num_train_epochs,
+        )
         if student.adapter_is_complete(student.output_dir):
             append_section_debug_log(
                 self.section_id,
@@ -479,19 +500,83 @@ class Orchestrator:
     ) -> tuple[list[Evaluation_Output], list[Any], Failure_VaultDB]:
         state_before_eval = load_pipeline_state(self.section_id)
         round_id = state_before_eval.current_round
-        evaluations, ledger, vault = Evaluator(
+        batch_evaluator = Evaluator(
             self.student_model_id,
             student=student,
             generate_answers=generate_answers,
-        ).run()
-        self.last_round_health = self.record_round_health(
-            round_id=round_id,
-            evaluations=evaluations,
-            adapter_path=adapter_path,
-            validation_loss=validation_loss,
-            validation_source=validation_source,
         )
-        return evaluations, ledger, vault
+        created_student_for_eval = student is None
+        try:
+            if validation_loss is None and self.use_shared_validation:
+                validation_loss, validation_source = self.evaluate_shared_validation(
+                    batch_evaluator.student,
+                    round_id=round_id,
+                )
+
+            evaluations, ledger, vault = batch_evaluator.run()
+            self.last_round_health = self.record_round_health(
+                round_id=round_id,
+                evaluations=evaluations,
+                adapter_path=adapter_path,
+                validation_loss=validation_loss,
+                validation_source=validation_source,
+            )
+            return evaluations, ledger, vault
+        finally:
+            if created_student_for_eval:
+                batch_evaluator.student.release_runtime()
+
+    def ensure_shared_validation_set(self) -> None:
+        ensure_shared_validation_samples(
+            section_id=self.section_id,
+            model_id=self.instructor_model_id,
+            validation_size=self.shared_validation_size,
+        )
+
+    def evaluate_shared_validation(
+        self,
+        student: TrainyModel,
+        *,
+        round_id: int,
+    ) -> tuple[float | None, str | None]:
+        validation_samples = load_shared_validation_samples(self.section_id)
+        if not validation_samples:
+            return None, None
+
+        evaluations = evaluate_shared_validation_samples(
+            student,
+            validation_samples,
+        )
+        validation_loss = average_validation_loss(evaluations)
+        validation_source = "shared_validation"
+        profile = build_validation_weakness_profile(
+            evaluations=evaluations,
+            round_id=round_id,
+            source=validation_source,
+        )
+
+        state = load_pipeline_state(self.section_id)
+        state.validation_weakness_profile = profile
+        pressure_state = dict(state.learning_pressure_state or {})
+        pressure_state["validation_weakness_profile"] = profile
+        pressure_state["validation_task_shape_profile"] = profile.get(
+            "task_shape_profile",
+            {},
+        )
+        state.learning_pressure_state = pressure_state
+        save_pipeline_state(state, self.section_id)
+        append_section_debug_log(
+            self.section_id,
+            "shared_validation_evaluated",
+            {
+                "round_id": round_id,
+                "path": str(get_shared_validation_path(self.section_id)),
+                "avg_loss": validation_loss,
+                "sample_count": len(validation_samples),
+                "weakness_profile": profile,
+            },
+        )
+        return validation_loss, validation_source
 
     @staticmethod
     def adapter_path_for_round(

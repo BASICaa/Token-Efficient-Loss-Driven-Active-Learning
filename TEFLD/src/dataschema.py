@@ -81,6 +81,9 @@ class Evaluation_Output(BaseModel):
     tag: str
     source: Literal["generated", "recycled"]
     source_ledger_id: int | None = None
+    requested_difficulty: str | None = None
+    observed_difficulty: str | None = None
+    difficulty_score: dict[str, Any] = Field(default_factory=dict)
 
 class Training_Sample(BaseModel):
     """
@@ -93,6 +96,9 @@ class Training_Sample(BaseModel):
     source: Literal["generated", "recycled"]
     source_ledger_id: int | None = None
     tag: str
+    requested_difficulty: str | None = None
+    observed_difficulty: str | None = None
+    difficulty_score: dict[str, Any] = Field(default_factory=dict)
 
 class User_Example(BaseModel):
     """
@@ -132,6 +138,9 @@ class learning_record(BaseModel):
     round_id: int
     source: Literal["generated", "recycled"] | None = None
     source_ledger_id: int | None = None
+    requested_difficulty: str | None = None
+    observed_difficulty: str | None = None
+    difficulty_score: dict[str, Any] = Field(default_factory=dict)
 
 class Instructor_Slot(BaseModel):
     """
@@ -183,6 +192,7 @@ class Pipeline_State(BaseModel):
     task_shape_profile: dict[str, Any] = Field(default_factory=dict)
     validation_weakness_profile: dict[str, Any] = Field(default_factory=dict)
     learning_pressure_state: dict[str, Any] = Field(default_factory=dict)
+    difficulty_state: dict[str, Any] = Field(default_factory=dict)
     round_health_history: list[dict[str, Any]] = Field(default_factory=list)
     best_round_id: int | None = None
     best_eval_loss: float | None = None

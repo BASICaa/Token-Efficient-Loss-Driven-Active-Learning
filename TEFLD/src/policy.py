@@ -67,6 +67,7 @@ VALIDATION_WEAKNESS_PLATEAU_FRACTION = 0.50
 VALIDATION_WEAKNESS_MIN_SLOTS = 1
 VALIDATION_WEAKNESS_MAX_SLOTS = 4
 VALIDATION_WEAKNESS_IMPROVEMENT_DELTA = 0.03
+VALIDATION_IMPROVEMENT_MIN_DENOMINATOR = 1e-6
 
 # Empty by default on purpose: concrete learning tags should come from the data
 # generation API and the loss-grouping API, not from a fixed local taxonomy.
@@ -602,6 +603,8 @@ class PolicyMaker:
             },
             "task_shape_profile": profile,
         }
+        difficulty_state = self.difficulty_policy_state(pressure=event)
+        event["difficulty_policy"] = difficulty_state
 
         history.append(event)
         self.pipeline.learning_pressure_state = {
@@ -615,6 +618,7 @@ class PolicyMaker:
                 "shape_gap": 0.20,
             },
         }
+        self.pipeline.difficulty_state = difficulty_state
         if save:
             save_pipeline_state(self.pipeline, self.section_id)
             append_section_debug_log(
@@ -665,7 +669,7 @@ class PolicyMaker:
 
         previous = float(scored_history[-2]["decision_loss"])
         current = float(scored_history[-1]["decision_loss"])
-        if previous <= 0:
+        if previous <= VALIDATION_IMPROVEMENT_MIN_DENOMINATOR:
             return None
         return (previous - current) / previous
 
@@ -744,6 +748,64 @@ class PolicyMaker:
             "fraction": fraction,
             "tags": tags,
             "top_categories": categories,
+            "latest_health_action": latest_action or None,
+            "validation_improvement": improvement,
+            "easy_batch_score": easy_batch_score,
+            "validation_plateau_score": validation_plateau_score,
+        }
+
+    def difficulty_policy_state(
+        self,
+        *,
+        pressure: dict[str, Any],
+    ) -> dict[str, Any]:
+        component_scores = pressure.get("component_scores") or {}
+        easy_batch_score = float(component_scores.get("easy_batch", 0.0) or 0.0)
+        validation_plateau_score = float(
+            component_scores.get("validation_plateau", 0.0) or 0.0
+        )
+        latest_health = (
+            self.pipeline.round_health_history[-1]
+            if self.pipeline.round_health_history
+            else {}
+        )
+        latest_action = str(latest_health.get("action") or "")
+        improvement = self.recent_validation_improvement()
+
+        regime = "stable"
+        difficulty_delta = 0
+        force_shape_diversification = False
+        increase_distractors_only = False
+        reason = "hold_current_difficulty"
+
+        if latest_action in {"degraded", "rollback_next", "rollback_unavailable"}:
+            regime = "struggling"
+            difficulty_delta = -1
+            reason = f"health_{latest_action}"
+        elif easy_batch_score >= 0.80 and validation_plateau_score >= 0.80:
+            regime = "plateau"
+            difficulty_delta = 1
+            force_shape_diversification = True
+            reason = "easy_training_validation_plateau"
+        elif easy_batch_score >= 0.80 and improvement is not None and improvement > 0:
+            regime = "coasting"
+            difficulty_delta = 1
+            reason = "training_easy_validation_improving"
+        elif improvement is None:
+            regime = "noisy"
+            increase_distractors_only = True
+            reason = "unclear_validation_signal"
+        elif improvement > 0:
+            regime = "stable"
+            reason = "mild_validation_improvement"
+
+        return {
+            "round_id": self.pipeline.current_round,
+            "regime": regime,
+            "difficulty_delta": difficulty_delta,
+            "force_shape_diversification": force_shape_diversification,
+            "increase_distractors_only": increase_distractors_only,
+            "reason": reason,
             "latest_health_action": latest_action or None,
             "validation_improvement": improvement,
             "easy_batch_score": easy_batch_score,

@@ -7,6 +7,12 @@ import re
 from typing import Any
 
 from .dataschema import Instructor_Slot, Pipeline_State, User_Example, learning_record
+from .difficulty import (
+    difficulty_budget_for,
+    format_difficulty_budget,
+    load_difficulty_config,
+    shift_difficulty,
+)
 
 
 WIDE_VARIETY_TAG = "wide_variety"
@@ -557,6 +563,7 @@ class GenerationBlueprint:
     target_tag_hint: str
     novelty_goal: str
     difficulty: str
+    difficulty_budget: dict[str, Any]
     domain_hint: str
     input_shape: str
     output_shape: str
@@ -587,6 +594,7 @@ class GenerationBlueprint:
             f"Target tag hint: {self.target_tag_hint}.",
             f"Novelty goal: {self.novelty_goal}.",
             f"Difficulty: {self.difficulty}.",
+            format_difficulty_budget(self.difficulty_budget),
             f"Domain hint: {self.domain_hint}.",
             f"Input shape: {self.input_shape}.",
             f"Output shape: {self.output_shape}.",
@@ -632,6 +640,16 @@ class GenerationBlueprint:
         if self.task_shape_profile.get("shape_id") == ASSISTANT_QA_SHAPE_ID:
             lines.append(
                 "For assistant_qa, use a standalone user question and do not add a separate Context block unless another explicit constraint overrides this."
+            )
+
+        output_format = self.difficulty_budget.get("output_format")
+        if output_format == "strict":
+            lines.append(
+                "For strict output format, require JSON, a markdown table, or exact labels in the student-facing instruction and expected output."
+            )
+        elif output_format == "structured":
+            lines.append(
+                "For structured output format, prefer bullets, numbered steps, compact key-value lines, or labeled fields."
             )
 
         if self.avoid_tags:
@@ -761,6 +779,15 @@ class DiversityPlanner:
             output_shape = "one concise sentence"
             reasoning_requirement = "choose the relevant fact while ignoring distractors"
 
+        difficulty = self.difficulty(*seed_parts, generation_intent=generation_intent)
+        shape_id = str(task_shape_profile.get("shape_id") or "")
+        difficulty_budget = difficulty_budget_for(
+            difficulty=difficulty,
+            tag=target_tag_hint if isinstance(target_tag_hint, str) else focus,
+            shape_id=shape_id,
+            config=load_difficulty_config(self.pipeline.section_id),
+        )
+
         return GenerationBlueprint(
             slot_id=slot.slot_id,
             curriculum_focus=slot.tag,
@@ -768,7 +795,8 @@ class DiversityPlanner:
             task_shape_profile=task_shape_profile,
             target_tag_hint=target_tag_hint,
             novelty_goal=self.novelty_goal(is_exploration, rare_tags, generation_intent),
-            difficulty=self.difficulty(*seed_parts, generation_intent=generation_intent),
+            difficulty=difficulty,
+            difficulty_budget=difficulty_budget,
             domain_hint=choose_rotated(
                 VISUAL_DOMAIN_HINTS
                 if modality_hint == "visual_generation"
@@ -884,17 +912,23 @@ class DiversityPlanner:
     def difficulty(self, *seed_parts: Any, generation_intent: str = "normal") -> str:
         if generation_intent == "hard":
             options = ["medium_hard", "hard", "hard"]
-            return choose_rotated(options, *seed_parts, "difficulty")
-        if generation_intent == "validation":
+            base_difficulty = choose_rotated(options, *seed_parts, "difficulty")
+        elif generation_intent == "validation":
             options = ["medium", "medium_hard", "medium_hard"]
-            return choose_rotated(options, *seed_parts, "difficulty")
-        if self.pipeline.current_round >= 8:
+            base_difficulty = choose_rotated(options, *seed_parts, "difficulty")
+        elif self.pipeline.current_round >= 8:
             options = ["medium", "medium_hard", "medium_hard"]
+            base_difficulty = choose_rotated(options, *seed_parts, "difficulty")
         elif self.pipeline.current_round >= 3:
             options = ["easy", "medium", "medium_hard"]
+            base_difficulty = choose_rotated(options, *seed_parts, "difficulty")
         else:
             options = DIFFICULTY_LEVELS
-        return choose_rotated(options, *seed_parts, "difficulty")
+            base_difficulty = choose_rotated(options, *seed_parts, "difficulty")
+
+        difficulty_state = getattr(self.pipeline, "difficulty_state", {}) or {}
+        delta = int(difficulty_state.get("difficulty_delta") or 0)
+        return shift_difficulty(base_difficulty, delta)
 
     @staticmethod
     def context_policy(
@@ -990,8 +1024,48 @@ class DiversityPlanner:
     def task_shape_profile(self, mode_info: PlannerModeInfo | None = None) -> dict[str, Any]:
         mode_info = mode_info or self.resolve_task_mode()
         user_profile = self.user_example_task_shape_profile(mode_info)
+        user_example_shape_id = user_profile.get("shape_id")
+        user_example_confidence = user_profile.get("confidence")
         pressure_state = getattr(self.pipeline, "learning_pressure_state", {}) or {}
         validation_profile = pressure_state.get("validation_task_shape_profile") or {}
+
+        recent_records = self.ledger[-60:] if self.ledger else []
+        if len(recent_records) >= 10:
+            fallback_modality = (
+                "visual" if mode_info.resolved_task_mode == "visual" else "text"
+            )
+            ledger_profile = infer_task_shape_profile(
+                recent_records,
+                source="recent_learning_ledger",
+                fallback_modality=fallback_modality,
+            )
+            merged_counts: Counter[str] = Counter(
+                user_profile.get("shape_counts") or {}
+            )
+            for shape, count in (ledger_profile.get("shape_counts") or {}).items():
+                merged_counts[str(shape)] += int(count) * 2
+
+            if merged_counts:
+                top_shape, top_count = merged_counts.most_common(1)[0]
+                total = sum(merged_counts.values())
+                share = top_count / total
+                user_profile = dict(ledger_profile)
+                user_profile["shape_id"] = top_shape
+                user_profile["shape_counts"] = dict(merged_counts)
+                user_profile["confidence"] = round(
+                    min(0.95, 0.35 + share * 0.60),
+                    4,
+                )
+                user_profile["recommended_focus_tag"] = task_shape_focus_tag(top_shape)
+                user_profile["hard_levers"] = task_shape_levers(top_shape)
+                user_profile["source"] = [
+                    "recent_learning_ledger",
+                    "original_user_examples",
+                ]
+                user_profile["ledger_shape_id"] = ledger_profile.get("shape_id")
+                user_profile["ledger_confidence"] = ledger_profile.get("confidence")
+                user_profile["user_example_shape_id"] = user_example_shape_id
+                user_profile["user_example_confidence"] = user_example_confidence
 
         if (
             isinstance(validation_profile, dict)

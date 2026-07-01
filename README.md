@@ -194,6 +194,8 @@ After filling `example.txt`, run one full TEFLD round:
 python run_tefld.py --rounds 1
 ```
 
+On the first evaluated run, TEFLD also creates `shared_validation.json`: a fixed 10-sample validation set used for best-checkpoint and rollback decisions. You can replace that file with your own held-out samples from the same broad distribution you care about; keeping it fixed is important because training-batch loss is too easy to overfit.
+
 Run multiple rounds:
 
 ```powershell
@@ -241,6 +243,8 @@ TEFLD/data/sections/section_XXX/
 Key files:
 
 - `example.txt`: seed examples provided by the user
+- `shared_validation.json`: fixed holdout-like validation samples for checkpoint selection
+- `difficulty_config.json`: editable difficulty budgets for generation levels
 - `pipeline_state.json`: current round, active recipe, current batch, planner state
 - `OverAllData.json`: full evaluated ledger
 - `failure_vault.json`: compact high-loss memory for recycling
@@ -258,13 +262,17 @@ TEFLD/Models/section_XXX/round_YYY/
 - trainer micro-batch size: `1`
 - gradient accumulation: `4`
 - learning rate: `2e-4`
-- epochs per round: `3`
+- epochs per round: `1`
 - max sequence length: `512`
 - LoRA rank: `4`
 - LoRA alpha: `8`
 - LoRA dropout: `0.05`
 
-The student masks prompt tokens and padding tokens with `-100`, so training loss is computed only on the expected answer.
+The student masks prompt tokens and padding tokens with `-100`, so training loss is computed only on the expected answer. Checkpoint selection uses the fixed `shared_validation.json` loss when evaluation is enabled; pass `--disable-shared-validation` only if you intentionally want to fall back to training-batch loss.
+
+The policy hard-generation thresholds in [TEFLD/src/policy.py](TEFLD/src/policy.py) are currently tuned to the observed loss scale of the known configured/tested local target, `gemma-4-E2B-it`. If you switch model families or sizes, retune those constants or replace them with history/percentile-based thresholds.
+
+Difficulty is adaptive. The planner starts from a per-section `difficulty_config.json`, records requested and observed difficulty on generated samples, retries severe generation misses once, and stores the current difficulty regime in `pipeline_state.json`.
 
 ## GitHub Notes
 
