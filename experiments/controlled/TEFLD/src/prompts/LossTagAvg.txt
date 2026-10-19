@@ -1,0 +1,48 @@
+You are given a list of API-assigned tags from a loss vault.
+
+Input:
+***TagList***
+
+Each item contains:
+
+* a tag name
+* its loss percentage
+
+Your task:
+
+1. Analyze the tags and group together tags that are semantically related or refer to the same type of issue.
+2. For each related group, calculate the average loss percentage.
+3. Return up to 3 groups with the highest average loss.
+4. If the tags are not meaningfully related to each other, simply return the highest-loss individual tags.
+
+Output rules:
+
+* Return only valid JSON.
+* Do not include explanations or extra text.
+* The JSON must contain at most 3 items.
+* Each item must include:
+
+  * "tag": the final grouped tag name
+  * "avg_loss": the average loss percentage
+  * "source_tags": the original tag names included in this group
+
+Expected JSON format:
+{
+"top_tags": [
+{
+"tag": "tag name",
+"avg_loss": 0.0,
+"source_tags": ["original tag"]
+},
+{
+"tag": "tag name",
+"avg_loss": 0.0,
+"source_tags": ["original tag"]
+},
+{
+"tag": "tag name",
+"avg_loss": 0.0,
+"source_tags": ["original tag"]
+}
+]
+}

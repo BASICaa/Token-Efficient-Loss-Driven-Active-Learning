@@ -1,6 +1,8 @@
 from __future__ import annotations
 
 import json
+import hashlib
+from pathlib import Path
 from collections import defaultdict
 from statistics import mean
 from typing import Any
@@ -24,7 +26,6 @@ from .instructor import (
     format_user_example_for_prompt,
 )
 from .student import TrainyModel
-
 
 SHARED_VALIDATION_FILENAME = "shared_validation.json"
 DEFAULT_SHARED_VALIDATION_SIZE = 10
@@ -60,6 +61,64 @@ def save_shared_validation_samples(
             "samples": [sample.model_dump(mode="json") for sample in samples],
         },
     )
+
+
+def import_shared_validation_file(
+    section_id: str, validation_file: str | Path
+) -> list[Training_Sample]:
+    """Freeze local validation examples without calling the generator.
+
+    Adapted from the reviewed application's uncommitted import feature. An
+    existing generated or imported validation set cannot be replaced silently.
+    """
+    source = Path(validation_file).expanduser().resolve()
+    payload = source.read_bytes()
+    raw = json.loads(payload.decode("utf-8"))
+    rows = raw.get("samples", raw.get("items")) if isinstance(raw, dict) else raw
+    if not isinstance(rows, list) or not rows:
+        raise ValueError("Validation file must contain a nonempty JSON sample array.")
+    samples = []
+    for row in rows:
+        if not isinstance(row, dict):
+            raise ValueError("Every validation sample must be an object.")
+        sample = Training_Sample.model_validate({"source": "generated", **row})
+        if (
+            not sample.instruct.strip()
+            or not (sample.gold_summary or "").strip()
+            or not sample.tag.strip()
+        ):
+            raise ValueError(
+                "Validation requires nonempty instruction, reference answer and tag."
+            )
+        samples.append(sample)
+    existing = load_shared_validation_samples(section_id)
+    canonical = [sample.model_dump(mode="json") for sample in samples]
+    if (
+        existing
+        and [sample.model_dump(mode="json") for sample in existing] != canonical
+    ):
+        raise ValueError(
+            "This section already has a different frozen validation set; create a new section."
+        )
+    previous = read_json_file(get_shared_validation_path(section_id), {})
+    source_hash = hashlib.sha256(payload).hexdigest()
+    previous_hash = (
+        previous.get("metadata", {}).get("source_sha256")
+        if isinstance(previous, dict)
+        else None
+    )
+    if previous_hash and previous_hash != source_hash:
+        raise ValueError("Validation source fingerprint changed; create a new section.")
+    save_shared_validation_samples(
+        section_id,
+        samples,
+        metadata={
+            "source": "user_provided_validation",
+            "source_sha256": source_hash,
+            "validation_size": len(samples),
+        },
+    )
+    return samples
 
 
 def build_shared_validation_prompt(
@@ -139,9 +198,11 @@ def generate_shared_validation_samples(
         parser.training_sample_from_generated_object(
             raw_sample=raw_sample,
             instruction="fixed shared validation generation",
-            tag=str(raw_sample.get("tag") or "shared_validation")
-            if isinstance(raw_sample, dict)
-            else "shared_validation",
+            tag=(
+                str(raw_sample.get("tag") or "shared_validation")
+                if isinstance(raw_sample, dict)
+                else "shared_validation"
+            ),
             tag_counts=get_learning_tag_counts(section_id),
         )
         for raw_sample in raw_samples
@@ -172,10 +233,19 @@ def ensure_shared_validation_samples(
     section_id: str,
     model_id: str,
     validation_size: int = DEFAULT_SHARED_VALIDATION_SIZE,
+    validation_file: str | Path | None = None,
 ) -> list[Training_Sample]:
+    if validation_file is not None:
+        return import_shared_validation_file(section_id, validation_file)
     samples = load_shared_validation_samples(section_id)
     if samples:
-        if len(samples) != validation_size:
+        metadata = read_json_file(get_shared_validation_path(section_id), {})
+        source = (
+            metadata.get("metadata", {}).get("source")
+            if isinstance(metadata, dict)
+            else None
+        )
+        if source != "user_provided_validation" and len(samples) != validation_size:
             raise ValueError(
                 f"{SHARED_VALIDATION_FILENAME} must contain exactly "
                 f"{validation_size} samples, got {len(samples)}."
@@ -194,8 +264,7 @@ def evaluate_shared_validation_samples(
     samples: list[Training_Sample],
 ) -> list[Evaluation_Output]:
     return [
-        student.evaluate_sample(sample, generate_answer=False)
-        for sample in samples
+        student.evaluate_sample(sample, generate_answer=False) for sample in samples
     ]
 
 
@@ -227,10 +296,7 @@ def build_validation_weakness_profile(
     top_categories: list[dict[str, Any]] = []
     total = len(finite_evaluations)
     for tag, rows in groups.items():
-        losses = [
-            float(finite_loss_value(row.loss) or 0.0)
-            for row in rows
-        ]
+        losses = [float(finite_loss_value(row.loss) or 0.0) for row in rows]
         shape_profile = infer_task_shape_profile(
             rows,
             source="shared_validation_loss",
