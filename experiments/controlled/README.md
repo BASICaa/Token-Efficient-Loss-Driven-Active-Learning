@@ -101,6 +101,32 @@ The bank path starts from a bank-selected initial batch; the prepared shared
 Dolly warmup is used by dataset and live-generation paths, not the fixed-bank
 path. Compare like-for-like initial batches when designing a bank ablation.
 
+## Six-condition corrected-branch comparison using saved data
+
+`run_corrected_comparison.ps1` prepares and sequentially trains Dolly, local
+loss-guided TEFLD, local validation-guided TEFLD, and three saved-bank conditions:
+GPT-6.1 validation/loss and Luna validation. Export the three existing banks to
+the filenames shown above first. No generation or paid-enable flags are passed.
+
+```powershell
+conda activate hf-agents
+.\run_corrected_comparison.ps1 -Dataset "D:\path\to\dolly_train.jsonl" -Model "D:\path\to\gemma-4-E2B-it"
+```
+
+Default: 100 unique examples, seed 42, the earlier 64-row comparison validation.
+`-PrepareOnly` prepares without training. `-Examples 20 -Output outputs/smoke-20`
+is a smaller runtime test. `-FullValidation -Output outputs/full-validation-100`
+explicitly switches both validation views to all 256 rows. Use fresh outputs
+for changed settings. Completed/interrupted conditions resume on rerun.
+
+All outputs are below the selected output directory; after all six finish,
+`comparison.json` contains their scores, actual exposures and update counts.
+The initial batches for local/live versus fixed-bank paths differ as described
+above. Thus this is a new method comparison, not an isolated old-versus-new-code
+effect. Configuration/logging corrections do not guarantee an improvement in
+quality. Insufficient fixed-bank category coverage stops the round and preserves
+progress, without automatically purchasing more examples.
+
 ## Explicit live generation
 
 With `api-validation` or `api-loss`, omitting `--candidate-bank` requires both
