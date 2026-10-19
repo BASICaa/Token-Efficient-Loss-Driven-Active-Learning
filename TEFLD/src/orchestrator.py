@@ -123,6 +123,7 @@ class Orchestrator:
         use_shared_validation: bool = True,
         shared_validation_size: int = DEFAULT_SHARED_VALIDATION_SIZE,
         num_train_epochs: float | None = None,
+        validation_file: str | None = None,
     ) -> None:
         batch_size = validate_instructor_recipe_size(batch_size)
         self.example_format = self.validate_example_format(example_format)
@@ -141,6 +142,7 @@ class Orchestrator:
         self.use_shared_validation = use_shared_validation
         self.shared_validation_size = shared_validation_size
         self.num_train_epochs = num_train_epochs
+        self.validation_file = validation_file
         self.last_round_health: dict[str, Any] | None = None
 
     @staticmethod
@@ -531,6 +533,7 @@ class Orchestrator:
             section_id=self.section_id,
             model_id=self.instructor_model_id,
             validation_size=self.shared_validation_size,
+            validation_file=self.validation_file,
         )
 
     def evaluate_shared_validation(

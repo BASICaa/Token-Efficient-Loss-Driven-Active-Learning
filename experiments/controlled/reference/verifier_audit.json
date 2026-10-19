@@ -1,0 +1,92 @@
+{
+  "status": "passed",
+  "false_accepts": 0,
+  "false_rejects": 0,
+  "valid_cases": 8,
+  "invalid_cases": 8,
+  "results": [
+    {
+      "category": "brainstorming",
+      "expected_accept": true,
+      "accepted": true
+    },
+    {
+      "category": "brainstorming",
+      "expected_accept": false,
+      "accepted": false
+    },
+    {
+      "category": "classification",
+      "expected_accept": true,
+      "accepted": true
+    },
+    {
+      "category": "classification",
+      "expected_accept": false,
+      "accepted": false
+    },
+    {
+      "category": "closed_qa",
+      "expected_accept": true,
+      "accepted": true
+    },
+    {
+      "category": "closed_qa",
+      "expected_accept": false,
+      "accepted": false
+    },
+    {
+      "category": "creative_writing",
+      "expected_accept": true,
+      "accepted": true
+    },
+    {
+      "category": "creative_writing",
+      "expected_accept": false,
+      "accepted": false
+    },
+    {
+      "category": "general_qa",
+      "expected_accept": true,
+      "accepted": true
+    },
+    {
+      "category": "general_qa",
+      "expected_accept": false,
+      "accepted": false
+    },
+    {
+      "category": "information_extraction",
+      "expected_accept": true,
+      "accepted": true
+    },
+    {
+      "category": "information_extraction",
+      "expected_accept": false,
+      "accepted": false
+    },
+    {
+      "category": "open_qa",
+      "expected_accept": true,
+      "accepted": true
+    },
+    {
+      "category": "open_qa",
+      "expected_accept": false,
+      "accepted": false
+    },
+    {
+      "category": "summarization",
+      "expected_accept": true,
+      "accepted": true
+    },
+    {
+      "category": "summarization",
+      "expected_accept": false,
+      "accepted": false
+    }
+  ],
+  "model": "openai/gpt-6.1-sol",
+  "teacher_identity": "1b3fd90a626096d0d365cb41f77a79e5e5a23279bea5da546f2fdffd8fb2ce39",
+  "scope": "Clear regression fixtures; not a universal correctness guarantee."
+}

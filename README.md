@@ -1,5 +1,33 @@
 # Token Efficient Loss Driven Active Learning
 
+This branch adds an isolated controlled experiment engine alongside the beta
+application. It supports **local validation-guided dataset retrieval** and
+**API validation-guided synthetic training**, including reuse of saved verified
+examples without new API calls.
+
+- [Controlled methods and commands](experiments/controlled/README.md)
+- [Integration scope and review boundaries](docs/INTEGRATION_REVIEW.md)
+- [Completed five-method study and figures](results/README.md)
+- [Machine-readable numeric results](results/five-way-100/snapshot.json)
+
+The completed study trained each method on 100 unique examples and used the same
+64 development evaluation examples. Dolly had the lowest reference-answer loss;
+local loss-guided TEFLD was close behind. Local validation-guided TEFLD is an
+available method, **not a measured result in this study**. The final holdout
+remains unscored. One seed and unequal token exposures limit the conclusions.
+
+![Five-method validation comparison](results/five-way-100/figures/validation_comparison.png)
+
+The existing beta application remains under `TEFLD/`; the controlled engine is
+under `experiments/controlled/`. Their validation roles and schemas differ.
+Review this integration before combining their internals. No new real training
+or paid API calls were started while preparing it.
+
+## Beta application and historical prototype study
+
+The documentation below describes the beta application and the older
+`comparison_data/` snapshot. Those results are separate from the new study above.
+
 TEFLD is a prototype active-learning loop for improving a local language model with small, high-value training batches.
 
 Instead of training on random data, TEFLD uses model loss to decide what to train next. Each round builds a 10-sample batch, trains a LoRA adapter, evaluates the student, records failures, and uses those failures to shape the next round.

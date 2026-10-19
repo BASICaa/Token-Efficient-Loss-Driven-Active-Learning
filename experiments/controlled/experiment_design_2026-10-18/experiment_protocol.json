@@ -1,0 +1,784 @@
+{
+  "status": "local_implementation_and_runtime_smokes_validated_primary_study_not_run",
+  "design_date": "2026-10-18",
+  "research_question": "Compare validation-category feedback, training-loss feedback, direct Dolly training, and a development-gated Jev-plus-gradient candidate-benefit selector under matched selected-student answer-token exposure; separately test Jev contribution and total cost.",
+  "dataset": {
+    "source": "data/databricks_databricks-dolly-15k_train.jsonl",
+    "sha256": "9765d49979c37d4b96a51651c4cfb8c399169390b6f751ca43e198355eedeb2a",
+    "manifest": "experiment_design_2026-10-18/split_manifest.json",
+    "manifest_sha256": "09521e96d3067062c5ea9b9fc95df6aa7e5966289ec056908f6488df99239051",
+    "categories": [
+      "brainstorming",
+      "classification",
+      "closed_qa",
+      "creative_writing",
+      "general_qa",
+      "information_extraction",
+      "open_qa",
+      "summarization"
+    ],
+    "scope": "Complete native-chat prompt and answer fit 512 tokens; categories have equal evaluation weight.",
+    "group_disjoint": true
+  },
+  "split_roles": {
+    "training_pool": {
+      "rows": 12649,
+      "allowed": [
+        "baseline_training",
+        "teacher_seed_examples",
+        "auxiliary_training_trajectories",
+        "training_only_selector_candidate_banks"
+      ],
+      "forbidden": [
+        "final_scoring"
+      ]
+    },
+    "curriculum_validation": {
+      "rows": 256,
+      "allowed": [
+        "validation_guided_curriculum_scoring",
+        "benefit_arm_gradient_statistic_extraction_without_optimizer_updates",
+        "benefit_arm_counterfactual_probe_outcome_measurement",
+        "benefit_predictor_development_labels"
+      ],
+      "forbidden": [
+        "gradient_training",
+        "replay",
+        "raw_teacher_prompt_content",
+        "checkpoint_selection",
+        "raw_jev_state_content"
+      ]
+    },
+    "checkpoint_validation": {
+      "rows": 256,
+      "allowed": [
+        "common_checkpoint_selection",
+        "development_reporting"
+      ],
+      "forbidden": [
+        "gradient_training",
+        "replay",
+        "teacher_prompt_content",
+        "curriculum_feedback",
+        "rollback",
+        "early_stopping",
+        "benefit_predictor_features",
+        "benefit_predictor_training_or_calibration_labels",
+        "jev_state_content"
+      ]
+    },
+    "final_test": {
+      "rows": 512,
+      "allowed": [
+        "final_evaluation_after_all_settings_and_checkpoints_are_frozen"
+      ],
+      "forbidden": [
+        "training",
+        "teacher_prompt_content",
+        "curriculum_feedback",
+        "checkpoint_selection",
+        "pilot_runs",
+        "benefit_predictor_features",
+        "benefit_predictor_training_or_calibration_labels",
+        "jev_state_content"
+      ]
+    }
+  },
+  "methods": [
+    {
+      "id": "tefld_validation",
+      "training_source": "verified_synthetic_examples_plus_training_replay",
+      "focused_generation_signal": "current_model_loss_by_task_family_on_curriculum_validation",
+      "training_loss_replay": "shared_with_all_synthetic_methods",
+      "focused_candidate_selection": "seeded_uniform_within_assigned_category_quotas_after_shared_quality_gates",
+      "jev_features": false,
+      "gradient_benefit_features": false
+    },
+    {
+      "id": "tefld_loss",
+      "training_source": "verified_synthetic_examples_plus_training_replay",
+      "focused_generation_signal": "current_model_loss_by_task_family_on_a_refreshed_training_ledger_probe",
+      "development_data_affects_curriculum": false,
+      "focused_candidate_selection": "seeded_uniform_within_assigned_category_quotas_after_shared_quality_gates",
+      "jev_features": false,
+      "gradient_benefit_features": false
+    },
+    {
+      "id": "dolly_baseline",
+      "training_source": "training_pool_only",
+      "sampling": "deterministic_seeded_category_balanced_shuffle_without_replacement",
+      "synthetic_generation": false,
+      "curriculum_feedback": false
+    },
+    {
+      "id": "tefld_benefit",
+      "training_source": "verified_synthetic_examples_plus_training_replay",
+      "focused_generation_signal": "same_curriculum_validation_category_rule_as_tefld_validation",
+      "focused_candidate_selection": "frozen_local_expected_probe_gain_predictor_using_jev_semantic_and_lora_gradient_features_within_assigned_category_quotas",
+      "training_loss_replay": "shared_with_all_synthetic_methods",
+      "development_data_affects_curriculum": true,
+      "promotion": "planned_fourth_arm; development_gate_before_design_freeze; exploratory_if_gate_fails",
+      "selector_controls_replay_or_exploration": false,
+      "primary_online_predictor_refitting": false
+    }
+  ],
+  "base_control": {
+    "id": "unadapted_base",
+    "train": false,
+    "score_with_same_tokenizer_quantization_and_prompts": true
+  },
+  "common_training": {
+    "model_path": "models/gemma-4-E2B-it",
+    "tokenizer_file_sha256": {
+      "tokenizer_config.json": "90c3a3ba5bf53818383a58e1a776cbcacd2a038d4812eaa373e1522f2d06f3df",
+      "tokenizer.json": "cc8d3a0ce36466ccc1278bf987df5f71db1719b9ca6b4118264f45cb627bfe0f",
+      "chat_template.jinja": "781d10940fbc44be40064b5d43a056fc486c84ceaa55538226368b57314132bf"
+    },
+    "seeds": [
+      42,
+      123,
+      2026
+    ],
+    "max_length": 512,
+    "micro_batch_size": 1,
+    "gradient_accumulation_steps": 4,
+    "learning_rate": 0.0002,
+    "epochs_per_round": 3,
+    "lora_rank": 4,
+    "lora_alpha": 8,
+    "lora_dropout": 0.05,
+    "round_recipe_slots": 10,
+    "supervised_token_budget_including_epoch_repeats": 30000,
+    "budget_count": "Shifted non-ignored assistant-target labels, including native turn-ending tokens; each epoch/replay presentation counts again.",
+    "final_budget_boundary": "Mask only excess target labels in the final accumulation group; require positive supervision in every executed forward.",
+    "allow_partial_final_training_round": true,
+    "match_optimizer_steps": false,
+    "log_actual_optimizer_steps": true,
+    "prompt_format": "One shared native-chat renderer; tokenize prompt and assistant suffix consistently; mask role/prompt/padding labels.",
+    "model_fingerprint": "Required before pilot: immutable model revision or hashes of local model configuration and weight files.",
+    "optimizer_contract": {
+      "optimizer": "adamw_torch",
+      "adam_beta1": 0.9,
+      "adam_beta2": 0.999,
+      "adam_epsilon": 1e-08,
+      "weight_decay": 0.0,
+      "max_grad_norm": 1.0,
+      "lr_scheduler_type": "linear",
+      "warmup_steps": 0,
+      "state_lifecycle": "reset_optimizer_and_scheduler_each_round_for_all_methods; preserve_student_adapter_weights",
+      "rationale": "Explicit proposed settings; preserve the existing per-round restart behavior rather than change it only in one arm."
+    },
+    "precision_contract": "4bit NF4 double-quantization; BF16 compute on supported CUDA; frozen large floating parameters retain pretrained dtype; small floating parameters FP32; adapters FP32; identical base-reference preparation."
+  },
+  "tefld_controls": {
+    "teacher_model_id": "gpt-5.4-mini-2026-03-17",
+    "teacher_temperature": 0.7,
+    "seed_example_row_ids": [
+      6518,
+      9838,
+      12786,
+      14237,
+      9868,
+      6951,
+      6861,
+      9423
+    ],
+    "initial_synthetic_batch": "Generate and validate once per seed; identical initial batch for V/L/B; exposure counts in each budget; benefit selection starts after warmup.",
+    "shared_generation_slots": {
+      "replay_max": 3,
+      "exploration": 4,
+      "focused": "remaining slots; normally 3, more if replay unavailable"
+    },
+    "exploration_sampling": "uniform over the eight task families",
+    "feedback_refresh": "after each completed training round",
+    "loss_probe_max_rows": 128,
+    "loss_probe_source": "accepted training ledger only; no development rows",
+    "validation_feedback_payload": "task_family,count,mean_loss,trend only; no questions, contexts, answers, or worst-row previews",
+    "api_semantic_grouping": false,
+    "hard_generation": false,
+    "rollback": false,
+    "early_stopping": false,
+    "failure_vault_max_items": 10,
+    "recycle_max_uses_per_item": 2,
+    "recycle_cooldown_rounds": 1,
+    "commit_replay_usage_after_successful_training": true,
+    "focused_candidate_pool": {
+      "applies_to": [
+        "tefld_validation",
+        "tefld_loss",
+        "tefld_benefit"
+      ],
+      "focused_slots": "10 - actual_replay_slots - 4",
+      "candidates_per_focused_slot": 2,
+      "preserve_focus_category_quotas": true,
+      "quality_gate_before_selection": true,
+      "replacement_attempts_per_missing_slot_max": 3,
+      "incomplete_valid_recipe_action": "pause_without_training_or_replay_consumption",
+      "charge_rejected_and_unselected_generation": true,
+      "initial_shared_batch_exempt": true
+    },
+    "teacher_family": "gpt-5.4-mini",
+    "teacher_reasoning_effort": "none",
+    "verifier_temperature": 0.0,
+    "teacher_max_completion_tokens": 512,
+    "teacher_service_tier": "default",
+    "teacher_pricing": {
+      "date": "2026-10-18",
+      "input_per_million_usd": 0.75,
+      "cached_input_per_million_usd": 0.075,
+      "output_per_million_usd": 4.5,
+      "source": "https://developers.openai.com/api/docs/pricing"
+    },
+    "teacher_request_ceiling": 10000,
+    "teacher_spend_ceiling_usd": 25.0
+  },
+  "checkpoint_selection": {
+    "nominal_supervised_token_milestones": [
+      5000,
+      10000,
+      15000,
+      20000,
+      25000,
+      30000
+    ],
+    "evaluate_at": "first optimizer boundary reaching each nominal milestone; always record actual token count; final budget is exact",
+    "same_number_of_candidates_for_each_method": true,
+    "criterion": "minimum category-macro mean expected-answer NLL on checkpoint_validation",
+    "minimum_improvement_threshold_for_selection": 0.0,
+    "tie_break": "earliest candidate",
+    "report": [
+      "selected_checkpoint",
+      "final_budget_checkpoint"
+    ],
+    "base_control_is_a_reference_not_a_selection_candidate": true
+  },
+  "quality_gates": {
+    "all_training_examples": [
+      "required_fields_and_canonical_task_family",
+      "positive_supervised_tokens",
+      "complete_prompt_and_answer_fit_max_length",
+      "no_split_or_near_duplicate_leakage",
+      "required_output_schema_where_applicable"
+    ],
+    "synthetic_examples": [
+      "independent_arithmetic_or_constraint_checker_for_verifiable_tasks",
+      "context_support_check_for_grounded_tasks",
+      "format_validator_using_explicit_output_spec",
+      "independent_review_or_verification_for_open_factual_answers"
+    ],
+    "rejected_example_action": "quarantine with reason; do not train or replay",
+    "nonfinite_loss_action": "abort before optimizer update; preserve stage for safe retry",
+    "nonfinite_gradient_action": "abort optimizer update",
+    "json_serialization": "strict; reject NaN and Infinity",
+    "verifier_regression_audit": {
+      "valid_cases": 8,
+      "invalid_cases": 8,
+      "maximum_false_accepts": 0,
+      "maximum_false_rejects": 1,
+      "scope": "Clear independently specified regression cases; not sufficient evidence for general verifier accuracy."
+    }
+  },
+  "metrics": {
+    "primary": "category-macro mean teacher-forced answer NLL on final_test",
+    "secondary": [
+      "target-token-weighted NLL",
+      "per-category NLL",
+      "generated-answer exact/alias match where valid",
+      "extraction or classification F1 where valid",
+      "required-format pass rate",
+      "blinded open-ended answer quality",
+      "mean and standard deviation across seeds",
+      "paired per-example loss differences",
+      "group-aware bootstrap intervals with seed-variation caveat",
+      "benefit_selector_heldout_prediction_and_calibration_metrics",
+      "realized_probe_and_batch_gain",
+      "predeclared_paired_V_L_V_D_L_D_B_V_contrasts"
+    ],
+    "generated_answers": {
+      "decoding": "greedy",
+      "max_new_tokens": 512,
+      "stop_tokens": "native model turn-ending and EOS configuration",
+      "blinded_review_row_ids": [
+        1013,
+        1016,
+        1592,
+        1615,
+        1851,
+        2193,
+        2450,
+        2611,
+        2664,
+        3591,
+        3772,
+        4174,
+        4197,
+        4237,
+        4270,
+        5018,
+        5498,
+        5687,
+        5784,
+        5791,
+        6072,
+        6101,
+        6129,
+        6173,
+        6309,
+        6354,
+        6386,
+        6783,
+        6784,
+        7009,
+        7112,
+        7640,
+        7785,
+        7885,
+        7897,
+        7904,
+        8203,
+        8227,
+        8653,
+        8804,
+        8995,
+        9804,
+        9973,
+        9981,
+        9991,
+        10280,
+        10504,
+        11284,
+        11450,
+        11627,
+        11705,
+        11746,
+        11958,
+        12224,
+        12314,
+        12326,
+        12547,
+        13038,
+        13192,
+        13470,
+        13920,
+        14099,
+        14477,
+        14946
+      ],
+      "blinded_review_rubric": [
+        "correctness_or_context_support",
+        "instruction_and_format_following",
+        "completeness"
+      ],
+      "reviewers": 2
+    },
+    "efficiency": [
+      "actual_supervised_tokens",
+      "prompt_and_padding_tokens",
+      "unique_examples",
+      "replay_exposures",
+      "optimizer_updates",
+      "API_input_output_cached_tokens",
+      "API_retries_and_rejections",
+      "generation_training_evaluation_wall_time_separately",
+      "peak_VRAM",
+      "auxiliary_trajectory_supervised_tokens",
+      "virtual_probe_supervised_tokens_and_optimizer_steps",
+      "selection_validation_forwards_backwards",
+      "jev_usage_latency_retries",
+      "selection_and_probe_wall_time",
+      "full_setup_cost_and_explicitly_amortized_cost"
+    ],
+    "primary_checkpoint": "final_budget_checkpoint at exactly 30000 supervised token exposures",
+    "secondary_checkpoint": "checkpoint_validation-selected checkpoint within the same allocated 30000-token budget; record its actual token exposure"
+  },
+  "phases": [
+    {
+      "name": "implementation_acceptance",
+      "model_training": false,
+      "test": "regression, leakage, deterministic manifest, and crash-recovery tests"
+    },
+    {
+      "name": "pilot",
+      "methods": [
+        "tefld_validation",
+        "tefld_loss",
+        "dolly_baseline"
+      ],
+      "seeds": [
+        42
+      ],
+      "supervised_token_budget": 5000,
+      "checkpoint_validation_rows_per_category": 8,
+      "curriculum_validation_rows_per_category": 8,
+      "final_test_access": false,
+      "allow_design_changes_after_phase": true
+    },
+    {
+      "name": "benefit_feasibility",
+      "successful_candidate_probes": 32,
+      "final_test_access": false,
+      "action": "prove_state_restore_gain_resolution_provider_contract_and_profile_cost_before_expansion"
+    },
+    {
+      "name": "benefit_calibration_and_selector_audit",
+      "successful_candidate_probe_ceiling": 256,
+      "auxiliary_student_token_exposure_ceiling": 90000,
+      "seeds": [
+        7,
+        17,
+        29
+      ],
+      "final_test_access": false,
+      "action": "fit_calibrate_lock_audit_and_apply_development_promotion_gate"
+    },
+    {
+      "name": "common_bank_selector_pilot",
+      "supervised_token_budget": 5000,
+      "variants": [
+        "uniform",
+        "gradient_only",
+        "jev_only",
+        "hybrid"
+      ],
+      "final_test_access": false,
+      "seeds": [
+        42
+      ]
+    },
+    {
+      "name": "freeze_design",
+      "final_test_access": false,
+      "action": "freeze protocol, dataset/tokenizer/model hashes, graders and checkpoint-selection rule; freeze benefit promotion status, predictor/rubric/views, optimizer contract, common pools, resource caps and comparison family"
+    },
+    {
+      "name": "primary_comparison",
+      "methods": [
+        "tefld_validation",
+        "tefld_loss",
+        "dolly_baseline",
+        "tefld_benefit"
+      ],
+      "seeds": [
+        42,
+        123,
+        2026
+      ],
+      "supervised_token_budget": 30000,
+      "fresh_adapters_and_sections": true,
+      "final_test_access": "after all predeclared primary training runs and selections finish",
+      "conditional_methods": {
+        "tefld_benefit": "include_confirmatory_only_if_development_gate_passes_before_freeze; otherwise_exploratory"
+      },
+      "runs_if_four_methods_promoted": 12,
+      "selected_student_exposures_if_four_methods_promoted": 360000,
+      "original_three_method_exposures": 270000
+    },
+    {
+      "name": "ablations",
+      "optional_additional_training": true,
+      "variants": [
+        "validation_guided_without_replay",
+        "loss_guided_without_replay",
+        "synthetic_generation_without_loss_guidance_or_replay",
+        "common_bank_gradient_only",
+        "common_bank_jev_only",
+        "common_bank_hybrid",
+        "common_bank_uniform_and_shuffled_controls",
+        "candidate_multiplier_one_vs_two",
+        "fresh_vs_five_round_gradient_refresh",
+        "raw_alignment_vs_subspace_features",
+        "gain_vs_gain_per_token",
+        "frozen_vs_online_predictor"
+      ],
+      "evaluation": "use development data for new design choices; a confirmatory test after tuning requires another untouched test set"
+    }
+  ],
+  "implementation_needed": [
+    "sample and output validation",
+    "supervised-token-aware encoder and budget controller",
+    "finite loss and gradient guards",
+    "build-only and adapter completion fixes",
+    "idempotent section round transaction and replay reservation",
+    "standalone evaluator and validation dataset loaders",
+    "explicit feedback-mode isolation",
+    "exact checkpoint selection separate from control thresholds",
+    "section identity and metadata/cache fixes",
+    "four-method multi-seed runner and full auxiliary/API cost logging",
+    "shared_verified_focused_candidate_pools_with_uniform_controls",
+    "current_LoRA_gradient_and_Adam_update_features",
+    "pinned_Jev_adapter_rubric_and_fingerprinted_cache",
+    "isolated_counterfactual_probe_worker_with_exact_restore",
+    "grouped_probe_dataset_and_frozen_local_predictor",
+    "common_bank_selector_ablation_runner"
+  ],
+  "not_claimed": [
+    "Universal correctness of open-ended synthetic answers",
+    "A completed code fix",
+    "A trained-model result",
+    "A general full-length Dolly benchmark",
+    "Proof that validation guidance will outperform the other methods",
+    "Jev probabilities are calibrated for LoRA training gain without local evidence",
+    "A plain gradient score reproduces LESS or GIST",
+    "Matched selected-student tokens mean matched total compute",
+    "A single-example virtual step predicts full-round or final-test causal gain"
+  ],
+  "protocol_version": "2026-10-18-benefit-v1",
+  "benefit_prediction": {
+    "plan": "D:\\Road to become AI engineer\\Comparison of TEFLD\\experiment_design_2026-10-18\\BENEFIT_PREDICTION_PLAN.md",
+    "status": "design_only_no_jev_calls_no_model_training",
+    "jev": {
+      "provider": "typesafe",
+      "model": "jev-1.13.0",
+      "verified_on": "2026-10-18",
+      "endpoint": "https://api.typesafe.ai/v1/systemone",
+      "sdk": "typesafe-sdk; version to pin at implementation compatibility check",
+      "api_key_environment_variable": "TYPESAFE_API_KEY",
+      "customer_fine_tuning": false,
+      "role": "probabilistic_semantic_features_for_local_predictor",
+      "rubric_version": "candidate-benefit-semantic-v1",
+      "atomic_features": [
+        "weak_skill_relevance_noul",
+        "training_neighbor_redundancy_noul",
+        "transferable_skill_score_distribution",
+        "context_self_containment_noul",
+        "experimental_raw_probe_benefit_noul"
+      ],
+      "state_allowed": [
+        "verified_training_candidate",
+        "compact_category_weakness_descriptions",
+        "training_only_neighbors",
+        "checkpoint_dependent_semantic_summary"
+      ],
+      "state_forbidden": [
+        "raw_curriculum_validation_questions_contexts_answers",
+        "checkpoint_validation_data",
+        "final_test_data",
+        "raw_gradients",
+        "full_training_ledger"
+      ],
+      "score_expectation_is_nll_gain": false,
+      "noul_has_separate_confidence_field": false,
+      "confidence_is_verified_task_calibration": false,
+      "cache_key": [
+        "provider",
+        "actual_model_version",
+        "state_hash",
+        "rubric_hash",
+        "candidate_hash",
+        "relevant_student_summary_fingerprint"
+      ],
+      "exhausted_retry_action": "pause_round_with_saved_state; no_silent_backend_or_selector_substitution",
+      "log": [
+        "actual_response_model",
+        "input_output_usage",
+        "latency",
+        "retries",
+        "raw_response_hash",
+        "parser_version",
+        "cache_hit"
+      ],
+      "max_total_attempts_per_request": 3
+    },
+    "local_features": [
+      "current_candidate_nll",
+      "supervised_target_length",
+      "sequence_length",
+      "task_family",
+      "training_progress",
+      "lora_gradient_norm",
+      "overall_and_per_category_alignment",
+      "adam_aware_first_order_gain",
+      "duplicate_and_recent_history_features",
+      "gradient_feature_age",
+      "jev_distributions"
+    ],
+    "local_predictor": {
+      "regression": "standardized_ridge_with_small_predeclared_regularization_grid",
+      "hyperparameter_tuning": "grouped_chronological_inner_validation_within_fit_trajectory_only",
+      "regression_target": "signed_one_candidate_virtual_step_curriculum_macro_nll_reduction",
+      "classification": "regularized_logistic_head_and_heldout_calibration_check_only_if_both_classes_sufficient",
+      "delta_min": "determine_from_no_update_repeat_noise_and_declared_practical_resolution_in_development_then_freeze",
+      "outputs": [
+        "expected_gain_nll",
+        "p_improve_calibrated_if_supported",
+        "p_improve_raw_separate_from_calibrated_output"
+      ],
+      "frozen_during_primary_runs": true,
+      "selection": "rank_expected_gain_within_preallocated_category_quotas; hash_ties; least_negative_if_all_negative_and_flag",
+      "gain_per_token": "separate_ablation"
+    },
+    "gradient_features": {
+      "parameters": "trainable_LoRA_only",
+      "adapter_rank": 4,
+      "gradient_view_rows": 32,
+      "gradient_view_rows_per_category": 4,
+      "default_refresh": "each_round",
+      "five_round_refresh": "cost_ablation_only",
+      "candidate_features": "current_adapter_state_at_selection",
+      "first_order_gain": "dot(grad_curriculum_nll, theta_minus_virtual_adam_updated_theta)",
+      "optimizer_state_scope": "next_round_fresh_optimizer_state_under_shared_per_round_restart_contract",
+      "projection_dimensions_to_profile_if_needed": [
+        256,
+        1024
+      ],
+      "subspace_features": "later_separately_named_GIST_inspired_ablation_not_claimed_reproduction",
+      "zero_or_degenerate_gradient_action": "explicit_unavailable_state_after_common_training_only_warmup"
+    },
+    "probe": {
+      "optimizer_steps_per_candidate": 1,
+      "candidate_presentations_per_step": 1,
+      "accumulation_steps_for_probe": 1,
+      "production_round_accumulation_steps": 4,
+      "loss_normalization": "same_assistant_target_token_normalization_as_production",
+      "learning_rate": 0.0002,
+      "state_scope": "fresh_next_round_AdamW_state; first_step_of_shared_linear_no_warmup_schedule",
+      "target": "macro_nll_before_minus_after_on_fixed_curriculum_outcome_view",
+      "outcome_view_rows": 32,
+      "outcome_view_rows_per_category": 4,
+      "gradient_and_outcome_views_disjoint": true,
+      "view_membership_artifact": "benefit_curriculum_views.json",
+      "full_curriculum_reference_rows": 256,
+      "restore_required": [
+        "adapter_weights",
+        "optimizer_state",
+        "scheduler_state",
+        "RNGs",
+        "model_modes",
+        "gradient_buffers",
+        "mixed_precision_scaler_state"
+      ],
+      "live_state_fingerprint_same_on_all_exit_paths": true,
+      "curriculum_examples_used_in_optimizer_step": false,
+      "whole_round_causal_gain_claim": false,
+      "failed_or_nonfinite_probe": "no_label_no_live_update_log_failure",
+      "view_membership_sha256": "d2ed382097680efffa00cf3adb463af70a2a69fec050788fcd46b54d0a86a5d2"
+    },
+    "calibration": {
+      "initial_feasibility_successful_probes": 32,
+      "successful_candidate_probe_ceiling": 256,
+      "auxiliary_student_token_exposure_ceiling": 90000,
+      "fit": {
+        "trajectory_seed": 7,
+        "probes": 128,
+        "snapshots": [
+          "post_warmup",
+          7500,
+          11250,
+          15000,
+          18750,
+          22500,
+          26250,
+          30000
+        ]
+      },
+      "calibration": {
+        "trajectory_seed": 17,
+        "probes": 64,
+        "snapshots": [
+          "post_warmup",
+          10000,
+          20000,
+          30000
+        ]
+      },
+      "locked_selector_audit": {
+        "trajectory_seed": 29,
+        "probes": 64,
+        "snapshots": [
+          "post_warmup",
+          10000,
+          20000,
+          30000
+        ]
+      },
+      "auxiliary_policy": "validation_guided_tefld; no_primary_adapter_or_optimizer_reuse",
+      "candidate_groups_disjoint_across_fit_calibration_audit": true,
+      "trajectory_separation": true,
+      "probe_candidates_previously_trained_in_trajectory": false,
+      "include_nonselected_and_random_candidates": true,
+      "feasibility_probes_count_toward_ceiling": true,
+      "full_curriculum_audit_candidates": {
+        "total": 16,
+        "uniform": 8,
+        "top_hybrid": 8
+      },
+      "virtual_minibatch_audit": {
+        "snapshots": 4,
+        "selectors": [
+          "hybrid",
+          "gradient_only",
+          "uniform"
+        ],
+        "selected_candidates_per_batch": 4,
+        "supervised_exposure_budget": "min_available_target_count_across_three_batches_capped_at_128",
+        "positive_supervision_for_every_executed_example": true,
+        "full_curriculum_measurement": true,
+        "live_state_updates": false
+      },
+      "audit_driven_redesign": "requires_fresh_trajectory_and_candidate_audit",
+      "candidate_probe_attempt_ceiling": 512
+    },
+    "promotion_gate": [
+      "all_restore_and_leakage_acceptance_pass",
+      "measurable_gain_above_numerical_noise",
+      "heldout_ranking_beats_uniform",
+      "hybrid_observed_value_over_gradient_only",
+      "measured_resources_within_frozen_caps"
+    ],
+    "evaluation": [
+      "signed_gain_MAE_RMSE",
+      "within_checkpoint_rank_correlation",
+      "top_quartile_realized_gain_vs_uniform_and_gradient_only",
+      "Brier_log_loss_reliability_if_probability_supported",
+      "per_category_and_training_stage_errors",
+      "batch_transfer_check",
+      "full_auxiliary_plus_online_cost"
+    ],
+    "fixed_snapshot_controls": [
+      "uniform",
+      "training_loss",
+      "adam_aware_gradient_only",
+      "jev_only",
+      "hybrid",
+      "shuffled_hybrid"
+    ],
+    "common_bank_training_pilot": {
+      "supervised_token_budget": 5000,
+      "variants": [
+        "uniform",
+        "gradient_only",
+        "jev_only",
+        "hybrid"
+      ],
+      "fresh_adapters": true,
+      "final_test_access": false,
+      "seeds": [
+        42
+      ]
+    },
+    "execution_caps_to_freeze_after_profiling": [
+      "generation_attempts",
+      "provider_retries",
+      "gradient_refreshes",
+      "probe_attempts",
+      "wall_time",
+      "API_spend"
+    ],
+    "cost_attribution": "charge_full_auxiliary_setup_to_B_for_single_study; separately_report_amortization_with_explicit_run_count"
+  },
+  "planned_exposure_accounting_if_B_promoted": {
+    "primary_selected_student": 360000,
+    "auxiliary_trajectories_ceiling": 90000,
+    "original_three_method_pilot": 15000,
+    "common_bank_four_selector_pilot": 20000,
+    "total_before_virtual_probes_retries_optional_ablations": 485000,
+    "equal_total_compute_claim": false
+  },
+  "implementation_status": "implementation_2026-10-18/IMPLEMENTATION_STATUS.md",
+  "local_execution_policy": {
+    "paid_api_calls": false,
+    "jev": "cache_only_in_cli_fixture_tests_completed_live_integration_deferred",
+    "primary_study": "not_started",
+    "final_holdout": "not_scored"
+  }
+}

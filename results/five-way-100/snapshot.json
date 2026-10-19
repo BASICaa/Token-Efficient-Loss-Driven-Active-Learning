@@ -1,0 +1,2577 @@
+{
+  "schema_version": 1,
+  "date": "2026-10-19",
+  "seed": 42,
+  "base_model": "gemma-4-E2B-it",
+  "unique_training_examples_per_arm": 100,
+  "evaluation_role": "checkpoint_validation",
+  "evaluation_examples_per_arm": 64,
+  "evaluation_per_category": 8,
+  "warmup_examples_included_in_100": 10,
+  "warmup_identical": true,
+  "warmup_sha256": "2db7a05544ae38d86b8b176ee1326043ecb2dad0f12a19dbe1c391657ee6bec0",
+  "metric": "reference-answer macro category NLL; lower is better; not accuracy",
+  "ranking": [
+    "dolly_baseline",
+    "tefld_dataset_loss",
+    "sol61_validation",
+    "sol61_loss",
+    "luna_validation"
+  ],
+  "methods": {
+    "dolly_baseline": {
+      "unique_training_examples": 100,
+      "evaluation_examples": 64,
+      "macro_nll": 1.555982569756452,
+      "token_weighted_nll": 1.9934314882080855,
+      "answer_token_exposures": 22533,
+      "optimizer_updates": 80,
+      "training_presentations": 300,
+      "replay_batch_slots": 0,
+      "untrained_admissions": 0,
+      "base_identity": "aa7a948697d2b584119286a44328686e5fdd4295bd6f07bc291b70f71f91cac2",
+      "label": "Dolly",
+      "categories": {
+        "general_qa": 2.166573867201805,
+        "open_qa": 2.059547334909439,
+        "classification": 0.5671878913417459,
+        "creative_writing": 2.309997171163559,
+        "summarization": 0.9670652439817786,
+        "information_extraction": 0.7844489035196602,
+        "brainstorming": 2.6886471435427666,
+        "closed_qa": 0.9043930023908615
+      },
+      "evaluation_rows": [
+        {
+          "row_id": 401,
+          "category": "general_qa",
+          "loss": 1.638700246810913,
+          "answer_tokens": 66
+        },
+        {
+          "row_id": 455,
+          "category": "open_qa",
+          "loss": 2.4649791717529297,
+          "answer_tokens": 145
+        },
+        {
+          "row_id": 467,
+          "category": "classification",
+          "loss": 0.5213062763214111,
+          "answer_tokens": 5
+        },
+        {
+          "row_id": 489,
+          "category": "creative_writing",
+          "loss": 2.7943825721740723,
+          "answer_tokens": 299
+        },
+        {
+          "row_id": 529,
+          "category": "summarization",
+          "loss": 1.2050652503967285,
+          "answer_tokens": 79
+        },
+        {
+          "row_id": 547,
+          "category": "general_qa",
+          "loss": 1.190334677696228,
+          "answer_tokens": 30
+        },
+        {
+          "row_id": 572,
+          "category": "classification",
+          "loss": 0.347358375787735,
+          "answer_tokens": 4
+        },
+        {
+          "row_id": 613,
+          "category": "information_extraction",
+          "loss": 0.017743859440088272,
+          "answer_tokens": 6
+        },
+        {
+          "row_id": 638,
+          "category": "brainstorming",
+          "loss": 3.1402859687805176,
+          "answer_tokens": 76
+        },
+        {
+          "row_id": 701,
+          "category": "information_extraction",
+          "loss": 1.6239686012268066,
+          "answer_tokens": 36
+        },
+        {
+          "row_id": 742,
+          "category": "open_qa",
+          "loss": 1.7869127988815308,
+          "answer_tokens": 25
+        },
+        {
+          "row_id": 750,
+          "category": "general_qa",
+          "loss": 2.6768288612365723,
+          "answer_tokens": 82
+        },
+        {
+          "row_id": 788,
+          "category": "creative_writing",
+          "loss": 2.786100149154663,
+          "answer_tokens": 86
+        },
+        {
+          "row_id": 849,
+          "category": "open_qa",
+          "loss": 2.6027672290802,
+          "answer_tokens": 109
+        },
+        {
+          "row_id": 877,
+          "category": "brainstorming",
+          "loss": 1.820534348487854,
+          "answer_tokens": 48
+        },
+        {
+          "row_id": 897,
+          "category": "creative_writing",
+          "loss": 2.261561393737793,
+          "answer_tokens": 65
+        },
+        {
+          "row_id": 939,
+          "category": "brainstorming",
+          "loss": 2.328505039215088,
+          "answer_tokens": 161
+        },
+        {
+          "row_id": 970,
+          "category": "classification",
+          "loss": 1.9289697408676147,
+          "answer_tokens": 25
+        },
+        {
+          "row_id": 1009,
+          "category": "general_qa",
+          "loss": 3.02095365524292,
+          "answer_tokens": 111
+        },
+        {
+          "row_id": 1055,
+          "category": "open_qa",
+          "loss": 1.7255918979644775,
+          "answer_tokens": 20
+        },
+        {
+          "row_id": 1056,
+          "category": "general_qa",
+          "loss": 2.890143871307373,
+          "answer_tokens": 177
+        },
+        {
+          "row_id": 1068,
+          "category": "general_qa",
+          "loss": 2.199551582336426,
+          "answer_tokens": 378
+        },
+        {
+          "row_id": 1126,
+          "category": "classification",
+          "loss": 0.3360285460948944,
+          "answer_tokens": 47
+        },
+        {
+          "row_id": 1152,
+          "category": "brainstorming",
+          "loss": 0.6036302447319031,
+          "answer_tokens": 68
+        },
+        {
+          "row_id": 1199,
+          "category": "closed_qa",
+          "loss": 0.2004319429397583,
+          "answer_tokens": 12
+        },
+        {
+          "row_id": 1290,
+          "category": "closed_qa",
+          "loss": 1.8761299848556519,
+          "answer_tokens": 27
+        },
+        {
+          "row_id": 1352,
+          "category": "creative_writing",
+          "loss": 2.230487108230591,
+          "answer_tokens": 38
+        },
+        {
+          "row_id": 1366,
+          "category": "open_qa",
+          "loss": 2.619605302810669,
+          "answer_tokens": 154
+        },
+        {
+          "row_id": 1398,
+          "category": "classification",
+          "loss": 0.39408719539642334,
+          "answer_tokens": 83
+        },
+        {
+          "row_id": 1465,
+          "category": "general_qa",
+          "loss": 1.9977930784225464,
+          "answer_tokens": 41
+        },
+        {
+          "row_id": 1495,
+          "category": "information_extraction",
+          "loss": 1.147348165512085,
+          "answer_tokens": 65
+        },
+        {
+          "row_id": 1531,
+          "category": "classification",
+          "loss": 0.09757868200540543,
+          "answer_tokens": 37
+        },
+        {
+          "row_id": 1535,
+          "category": "closed_qa",
+          "loss": 0.704001247882843,
+          "answer_tokens": 33
+        },
+        {
+          "row_id": 1549,
+          "category": "information_extraction",
+          "loss": 0.7550612092018127,
+          "answer_tokens": 20
+        },
+        {
+          "row_id": 1613,
+          "category": "closed_qa",
+          "loss": 0.07576477527618408,
+          "answer_tokens": 60
+        },
+        {
+          "row_id": 1768,
+          "category": "closed_qa",
+          "loss": 1.86920166015625,
+          "answer_tokens": 48
+        },
+        {
+          "row_id": 2008,
+          "category": "closed_qa",
+          "loss": 0.3174407184123993,
+          "answer_tokens": 29
+        },
+        {
+          "row_id": 2023,
+          "category": "open_qa",
+          "loss": 2.2516636848449707,
+          "answer_tokens": 95
+        },
+        {
+          "row_id": 2053,
+          "category": "creative_writing",
+          "loss": 1.7013838291168213,
+          "answer_tokens": 89
+        },
+        {
+          "row_id": 2069,
+          "category": "summarization",
+          "loss": 0.9172527194023132,
+          "answer_tokens": 114
+        },
+        {
+          "row_id": 2155,
+          "category": "information_extraction",
+          "loss": 1.1508437395095825,
+          "answer_tokens": 58
+        },
+        {
+          "row_id": 2230,
+          "category": "closed_qa",
+          "loss": 1.7679526805877686,
+          "answer_tokens": 61
+        },
+        {
+          "row_id": 2275,
+          "category": "information_extraction",
+          "loss": 0.39162585139274597,
+          "answer_tokens": 25
+        },
+        {
+          "row_id": 2373,
+          "category": "closed_qa",
+          "loss": 0.424221009016037,
+          "answer_tokens": 22
+        },
+        {
+          "row_id": 2534,
+          "category": "creative_writing",
+          "loss": 2.106222152709961,
+          "answer_tokens": 130
+        },
+        {
+          "row_id": 2543,
+          "category": "creative_writing",
+          "loss": 2.342299461364746,
+          "answer_tokens": 257
+        },
+        {
+          "row_id": 2552,
+          "category": "information_extraction",
+          "loss": 0.08981385827064514,
+          "answer_tokens": 12
+        },
+        {
+          "row_id": 2650,
+          "category": "creative_writing",
+          "loss": 2.257540702819824,
+          "answer_tokens": 259
+        },
+        {
+          "row_id": 2669,
+          "category": "general_qa",
+          "loss": 1.7182849645614624,
+          "answer_tokens": 47
+        },
+        {
+          "row_id": 2723,
+          "category": "classification",
+          "loss": 0.5068880319595337,
+          "answer_tokens": 10
+        },
+        {
+          "row_id": 2752,
+          "category": "brainstorming",
+          "loss": 5.402778148651123,
+          "answer_tokens": 15
+        },
+        {
+          "row_id": 2889,
+          "category": "summarization",
+          "loss": 2.6165904998779297,
+          "answer_tokens": 96
+        },
+        {
+          "row_id": 2977,
+          "category": "summarization",
+          "loss": 0.0906035453081131,
+          "answer_tokens": 61
+        },
+        {
+          "row_id": 3015,
+          "category": "open_qa",
+          "loss": 0.6279393434524536,
+          "answer_tokens": 97
+        },
+        {
+          "row_id": 3184,
+          "category": "open_qa",
+          "loss": 2.3969192504882812,
+          "answer_tokens": 296
+        },
+        {
+          "row_id": 3208,
+          "category": "summarization",
+          "loss": 0.12304391711950302,
+          "answer_tokens": 30
+        },
+        {
+          "row_id": 3254,
+          "category": "information_extraction",
+          "loss": 1.0991859436035156,
+          "answer_tokens": 22
+        },
+        {
+          "row_id": 3546,
+          "category": "summarization",
+          "loss": 1.1328418254852295,
+          "answer_tokens": 26
+        },
+        {
+          "row_id": 3628,
+          "category": "summarization",
+          "loss": 1.4285725355148315,
+          "answer_tokens": 14
+        },
+        {
+          "row_id": 3726,
+          "category": "brainstorming",
+          "loss": 3.143817901611328,
+          "answer_tokens": 111
+        },
+        {
+          "row_id": 3899,
+          "category": "classification",
+          "loss": 0.4052862823009491,
+          "answer_tokens": 27
+        },
+        {
+          "row_id": 4084,
+          "category": "brainstorming",
+          "loss": 3.4182887077331543,
+          "answer_tokens": 26
+        },
+        {
+          "row_id": 4090,
+          "category": "brainstorming",
+          "loss": 1.6513367891311646,
+          "answer_tokens": 59
+        },
+        {
+          "row_id": 4324,
+          "category": "summarization",
+          "loss": 0.22255165874958038,
+          "answer_tokens": 51
+        }
+      ],
+      "training_curve": [
+        {
+          "round": 0,
+          "unique_examples": 10,
+          "token_exposures": 3549
+        },
+        {
+          "round": 1,
+          "unique_examples": 20,
+          "token_exposures": 5250
+        },
+        {
+          "round": 2,
+          "unique_examples": 30,
+          "token_exposures": 7560
+        },
+        {
+          "round": 3,
+          "unique_examples": 40,
+          "token_exposures": 10740
+        },
+        {
+          "round": 4,
+          "unique_examples": 50,
+          "token_exposures": 13089
+        },
+        {
+          "round": 5,
+          "unique_examples": 60,
+          "token_exposures": 14478
+        },
+        {
+          "round": 6,
+          "unique_examples": 70,
+          "token_exposures": 16140
+        },
+        {
+          "round": 7,
+          "unique_examples": 80,
+          "token_exposures": 18210
+        },
+        {
+          "round": 8,
+          "unique_examples": 90,
+          "token_exposures": 20151
+        },
+        {
+          "round": 9,
+          "unique_examples": 100,
+          "token_exposures": 22533
+        }
+      ],
+      "unique_examples_by_category": {
+        "closed_qa": 12,
+        "general_qa": 12,
+        "brainstorming": 13,
+        "summarization": 13,
+        "information_extraction": 13,
+        "open_qa": 12,
+        "classification": 13,
+        "creative_writing": 12
+      },
+      "api_cost_toman": {
+        "generation": 0,
+        "verification": 0
+      },
+      "training_core_sha256": "252aef2bdff3679bd6dea0f8ff3bf5b6cdbccd2a1cbf385ef81549c924f6c714",
+      "state_sha256": "ab9c5117d8580f5c2088b93eed306cac278e760e05243ee93aa1d221380eb1f1",
+      "weights_sha256": "f488bf339509a6e7833cbf2c305c47e044ad09eab47cee1bc0c7bcae167bdb5a",
+      "validation_sha256": "bc6931ca2b90ade694327404a64c4194057033474b49e3cc11a5538f23f572c2"
+    },
+    "tefld_dataset_loss": {
+      "unique_training_examples": 100,
+      "evaluation_examples": 64,
+      "macro_nll": 1.5747996890277136,
+      "token_weighted_nll": 2.021831357733524,
+      "answer_token_exposures": 40155,
+      "optimizer_updates": 111,
+      "training_presentations": 417,
+      "replay_batch_slots": 39,
+      "untrained_admissions": 1,
+      "base_identity": "aa7a948697d2b584119286a44328686e5fdd4295bd6f07bc291b70f71f91cac2",
+      "label": "Dataset TEFLD (loss)",
+      "categories": {
+        "general_qa": 2.1917905509471893,
+        "open_qa": 2.1012347862124443,
+        "classification": 0.5481208860874176,
+        "creative_writing": 2.3170856833457947,
+        "summarization": 0.9730098368600011,
+        "information_extraction": 0.8471932525280863,
+        "brainstorming": 2.697528950870037,
+        "closed_qa": 0.9224335653707385
+      },
+      "evaluation_rows": [
+        {
+          "row_id": 401,
+          "category": "general_qa",
+          "loss": 1.6033923625946045,
+          "answer_tokens": 66
+        },
+        {
+          "row_id": 455,
+          "category": "open_qa",
+          "loss": 2.5727336406707764,
+          "answer_tokens": 145
+        },
+        {
+          "row_id": 467,
+          "category": "classification",
+          "loss": 0.5994906425476074,
+          "answer_tokens": 5
+        },
+        {
+          "row_id": 489,
+          "category": "creative_writing",
+          "loss": 2.891451597213745,
+          "answer_tokens": 299
+        },
+        {
+          "row_id": 529,
+          "category": "summarization",
+          "loss": 1.2597612142562866,
+          "answer_tokens": 79
+        },
+        {
+          "row_id": 547,
+          "category": "general_qa",
+          "loss": 1.290158748626709,
+          "answer_tokens": 30
+        },
+        {
+          "row_id": 572,
+          "category": "classification",
+          "loss": 0.22768576443195343,
+          "answer_tokens": 4
+        },
+        {
+          "row_id": 613,
+          "category": "information_extraction",
+          "loss": 0.0306777972728014,
+          "answer_tokens": 6
+        },
+        {
+          "row_id": 638,
+          "category": "brainstorming",
+          "loss": 3.257405996322632,
+          "answer_tokens": 76
+        },
+        {
+          "row_id": 701,
+          "category": "information_extraction",
+          "loss": 1.6933469772338867,
+          "answer_tokens": 36
+        },
+        {
+          "row_id": 742,
+          "category": "open_qa",
+          "loss": 1.8865660429000854,
+          "answer_tokens": 25
+        },
+        {
+          "row_id": 750,
+          "category": "general_qa",
+          "loss": 2.6546313762664795,
+          "answer_tokens": 82
+        },
+        {
+          "row_id": 788,
+          "category": "creative_writing",
+          "loss": 2.744506597518921,
+          "answer_tokens": 86
+        },
+        {
+          "row_id": 849,
+          "category": "open_qa",
+          "loss": 2.611624240875244,
+          "answer_tokens": 109
+        },
+        {
+          "row_id": 877,
+          "category": "brainstorming",
+          "loss": 1.8367737531661987,
+          "answer_tokens": 48
+        },
+        {
+          "row_id": 897,
+          "category": "creative_writing",
+          "loss": 2.211230993270874,
+          "answer_tokens": 65
+        },
+        {
+          "row_id": 939,
+          "category": "brainstorming",
+          "loss": 2.2747795581817627,
+          "answer_tokens": 161
+        },
+        {
+          "row_id": 970,
+          "category": "classification",
+          "loss": 1.7994781732559204,
+          "answer_tokens": 25
+        },
+        {
+          "row_id": 1009,
+          "category": "general_qa",
+          "loss": 3.019177198410034,
+          "answer_tokens": 111
+        },
+        {
+          "row_id": 1055,
+          "category": "open_qa",
+          "loss": 1.5869812965393066,
+          "answer_tokens": 20
+        },
+        {
+          "row_id": 1056,
+          "category": "general_qa",
+          "loss": 2.937865972518921,
+          "answer_tokens": 177
+        },
+        {
+          "row_id": 1068,
+          "category": "general_qa",
+          "loss": 2.1928610801696777,
+          "answer_tokens": 378
+        },
+        {
+          "row_id": 1126,
+          "category": "classification",
+          "loss": 0.3417275547981262,
+          "answer_tokens": 47
+        },
+        {
+          "row_id": 1152,
+          "category": "brainstorming",
+          "loss": 0.5594114661216736,
+          "answer_tokens": 68
+        },
+        {
+          "row_id": 1199,
+          "category": "closed_qa",
+          "loss": 0.20399163663387299,
+          "answer_tokens": 12
+        },
+        {
+          "row_id": 1290,
+          "category": "closed_qa",
+          "loss": 1.9099695682525635,
+          "answer_tokens": 27
+        },
+        {
+          "row_id": 1352,
+          "category": "creative_writing",
+          "loss": 2.171048641204834,
+          "answer_tokens": 38
+        },
+        {
+          "row_id": 1366,
+          "category": "open_qa",
+          "loss": 2.686691999435425,
+          "answer_tokens": 154
+        },
+        {
+          "row_id": 1398,
+          "category": "classification",
+          "loss": 0.3820636570453644,
+          "answer_tokens": 83
+        },
+        {
+          "row_id": 1465,
+          "category": "general_qa",
+          "loss": 2.155712127685547,
+          "answer_tokens": 41
+        },
+        {
+          "row_id": 1495,
+          "category": "information_extraction",
+          "loss": 1.1678439378738403,
+          "answer_tokens": 65
+        },
+        {
+          "row_id": 1531,
+          "category": "classification",
+          "loss": 0.1480787843465805,
+          "answer_tokens": 37
+        },
+        {
+          "row_id": 1535,
+          "category": "closed_qa",
+          "loss": 0.7192071676254272,
+          "answer_tokens": 33
+        },
+        {
+          "row_id": 1549,
+          "category": "information_extraction",
+          "loss": 0.7082182168960571,
+          "answer_tokens": 20
+        },
+        {
+          "row_id": 1613,
+          "category": "closed_qa",
+          "loss": 0.08197189122438431,
+          "answer_tokens": 60
+        },
+        {
+          "row_id": 1768,
+          "category": "closed_qa",
+          "loss": 1.859750747680664,
+          "answer_tokens": 48
+        },
+        {
+          "row_id": 2008,
+          "category": "closed_qa",
+          "loss": 0.3512423634529114,
+          "answer_tokens": 29
+        },
+        {
+          "row_id": 2023,
+          "category": "open_qa",
+          "loss": 2.3221704959869385,
+          "answer_tokens": 95
+        },
+        {
+          "row_id": 2053,
+          "category": "creative_writing",
+          "loss": 1.6653845310211182,
+          "answer_tokens": 89
+        },
+        {
+          "row_id": 2069,
+          "category": "summarization",
+          "loss": 0.9419960379600525,
+          "answer_tokens": 114
+        },
+        {
+          "row_id": 2155,
+          "category": "information_extraction",
+          "loss": 1.1526211500167847,
+          "answer_tokens": 58
+        },
+        {
+          "row_id": 2230,
+          "category": "closed_qa",
+          "loss": 1.8356562852859497,
+          "answer_tokens": 61
+        },
+        {
+          "row_id": 2275,
+          "category": "information_extraction",
+          "loss": 0.42679256200790405,
+          "answer_tokens": 25
+        },
+        {
+          "row_id": 2373,
+          "category": "closed_qa",
+          "loss": 0.4176788628101349,
+          "answer_tokens": 22
+        },
+        {
+          "row_id": 2534,
+          "category": "creative_writing",
+          "loss": 2.104041576385498,
+          "answer_tokens": 130
+        },
+        {
+          "row_id": 2543,
+          "category": "creative_writing",
+          "loss": 2.4172420501708984,
+          "answer_tokens": 257
+        },
+        {
+          "row_id": 2552,
+          "category": "information_extraction",
+          "loss": 0.28756025433540344,
+          "answer_tokens": 12
+        },
+        {
+          "row_id": 2650,
+          "category": "creative_writing",
+          "loss": 2.3317794799804688,
+          "answer_tokens": 259
+        },
+        {
+          "row_id": 2669,
+          "category": "general_qa",
+          "loss": 1.680525541305542,
+          "answer_tokens": 47
+        },
+        {
+          "row_id": 2723,
+          "category": "classification",
+          "loss": 0.48405781388282776,
+          "answer_tokens": 10
+        },
+        {
+          "row_id": 2752,
+          "category": "brainstorming",
+          "loss": 5.319353103637695,
+          "answer_tokens": 15
+        },
+        {
+          "row_id": 2889,
+          "category": "summarization",
+          "loss": 2.5525524616241455,
+          "answer_tokens": 96
+        },
+        {
+          "row_id": 2977,
+          "category": "summarization",
+          "loss": 0.04154197871685028,
+          "answer_tokens": 61
+        },
+        {
+          "row_id": 3015,
+          "category": "open_qa",
+          "loss": 0.6564050316810608,
+          "answer_tokens": 97
+        },
+        {
+          "row_id": 3184,
+          "category": "open_qa",
+          "loss": 2.4867055416107178,
+          "answer_tokens": 296
+        },
+        {
+          "row_id": 3208,
+          "category": "summarization",
+          "loss": 0.11379628628492355,
+          "answer_tokens": 30
+        },
+        {
+          "row_id": 3254,
+          "category": "information_extraction",
+          "loss": 1.3104851245880127,
+          "answer_tokens": 22
+        },
+        {
+          "row_id": 3546,
+          "category": "summarization",
+          "loss": 1.1107978820800781,
+          "answer_tokens": 26
+        },
+        {
+          "row_id": 3628,
+          "category": "summarization",
+          "loss": 1.602679967880249,
+          "answer_tokens": 14
+        },
+        {
+          "row_id": 3726,
+          "category": "brainstorming",
+          "loss": 3.1647818088531494,
+          "answer_tokens": 111
+        },
+        {
+          "row_id": 3899,
+          "category": "classification",
+          "loss": 0.4023846983909607,
+          "answer_tokens": 27
+        },
+        {
+          "row_id": 4084,
+          "category": "brainstorming",
+          "loss": 3.530876636505127,
+          "answer_tokens": 26
+        },
+        {
+          "row_id": 4090,
+          "category": "brainstorming",
+          "loss": 1.636849284172058,
+          "answer_tokens": 59
+        },
+        {
+          "row_id": 4324,
+          "category": "summarization",
+          "loss": 0.1609528660774231,
+          "answer_tokens": 51
+        }
+      ],
+      "training_curve": [
+        {
+          "round": 0,
+          "unique_examples": 10,
+          "token_exposures": 3549
+        },
+        {
+          "round": 1,
+          "unique_examples": 17,
+          "token_exposures": 6639
+        },
+        {
+          "round": 2,
+          "unique_examples": 24,
+          "token_exposures": 9270
+        },
+        {
+          "round": 3,
+          "unique_examples": 31,
+          "token_exposures": 12957
+        },
+        {
+          "round": 4,
+          "unique_examples": 38,
+          "token_exposures": 15384
+        },
+        {
+          "round": 5,
+          "unique_examples": 45,
+          "token_exposures": 17565
+        },
+        {
+          "round": 6,
+          "unique_examples": 52,
+          "token_exposures": 19968
+        },
+        {
+          "round": 7,
+          "unique_examples": 59,
+          "token_exposures": 22677
+        },
+        {
+          "round": 8,
+          "unique_examples": 66,
+          "token_exposures": 25155
+        },
+        {
+          "round": 9,
+          "unique_examples": 73,
+          "token_exposures": 27606
+        },
+        {
+          "round": 10,
+          "unique_examples": 80,
+          "token_exposures": 30027
+        },
+        {
+          "round": 11,
+          "unique_examples": 87,
+          "token_exposures": 34062
+        },
+        {
+          "round": 12,
+          "unique_examples": 94,
+          "token_exposures": 37488
+        },
+        {
+          "round": 13,
+          "unique_examples": 100,
+          "token_exposures": 40155
+        }
+      ],
+      "unique_examples_by_category": {
+        "closed_qa": 9,
+        "general_qa": 15,
+        "brainstorming": 18,
+        "summarization": 14,
+        "information_extraction": 7,
+        "open_qa": 11,
+        "classification": 9,
+        "creative_writing": 17
+      },
+      "api_cost_toman": {
+        "generation": 0,
+        "verification": 0
+      },
+      "training_core_sha256": "252aef2bdff3679bd6dea0f8ff3bf5b6cdbccd2a1cbf385ef81549c924f6c714",
+      "state_sha256": "bcae5566d771379e1443545f652d235bad026b82248386e4417a6003ddc57402",
+      "weights_sha256": "a4b0753439bbb8360bc9d43f4c31fc309a633b9fdbb49d89de98652e9857a465",
+      "validation_sha256": "1e65a37ea9a715c0f6d368ef37bf0ecfca6d9e6c3b3ebdacb025d2767155c5b9"
+    },
+    "sol61_validation": {
+      "unique_training_examples": 100,
+      "evaluation_examples": 64,
+      "macro_nll": 1.8824003193585668,
+      "token_weighted_nll": 2.229442096612474,
+      "answer_token_exposures": 28176,
+      "optimizer_updates": 111,
+      "training_presentations": 417,
+      "replay_batch_slots": 39,
+      "untrained_admissions": 1,
+      "base_identity": "aa7a948697d2b584119286a44328686e5fdd4295bd6f07bc291b70f71f91cac2",
+      "label": "GPT-6.1 validation",
+      "categories": {
+        "general_qa": 2.3421105593442917,
+        "open_qa": 2.429674506187439,
+        "classification": 1.2499962970614433,
+        "creative_writing": 2.5978996008634567,
+        "summarization": 1.1918744202703238,
+        "information_extraction": 1.0754995869938284,
+        "brainstorming": 3.0992459058761597,
+        "closed_qa": 1.0729016782715917
+      },
+      "evaluation_rows": [
+        {
+          "row_id": 401,
+          "category": "general_qa",
+          "loss": 1.7672559022903442,
+          "answer_tokens": 66
+        },
+        {
+          "row_id": 455,
+          "category": "open_qa",
+          "loss": 2.650278091430664,
+          "answer_tokens": 145
+        },
+        {
+          "row_id": 467,
+          "category": "classification",
+          "loss": 1.2734706401824951,
+          "answer_tokens": 5
+        },
+        {
+          "row_id": 489,
+          "category": "creative_writing",
+          "loss": 3.02252197265625,
+          "answer_tokens": 299
+        },
+        {
+          "row_id": 529,
+          "category": "summarization",
+          "loss": 1.3861608505249023,
+          "answer_tokens": 79
+        },
+        {
+          "row_id": 547,
+          "category": "general_qa",
+          "loss": 1.3664239645004272,
+          "answer_tokens": 30
+        },
+        {
+          "row_id": 572,
+          "category": "classification",
+          "loss": 2.7891716957092285,
+          "answer_tokens": 4
+        },
+        {
+          "row_id": 613,
+          "category": "information_extraction",
+          "loss": 0.024444790557026863,
+          "answer_tokens": 6
+        },
+        {
+          "row_id": 638,
+          "category": "brainstorming",
+          "loss": 3.446835517883301,
+          "answer_tokens": 76
+        },
+        {
+          "row_id": 701,
+          "category": "information_extraction",
+          "loss": 2.3160955905914307,
+          "answer_tokens": 36
+        },
+        {
+          "row_id": 742,
+          "category": "open_qa",
+          "loss": 2.205287218093872,
+          "answer_tokens": 25
+        },
+        {
+          "row_id": 750,
+          "category": "general_qa",
+          "loss": 2.862936019897461,
+          "answer_tokens": 82
+        },
+        {
+          "row_id": 788,
+          "category": "creative_writing",
+          "loss": 3.555799722671509,
+          "answer_tokens": 86
+        },
+        {
+          "row_id": 849,
+          "category": "open_qa",
+          "loss": 3.1259422302246094,
+          "answer_tokens": 109
+        },
+        {
+          "row_id": 877,
+          "category": "brainstorming",
+          "loss": 2.1973230838775635,
+          "answer_tokens": 48
+        },
+        {
+          "row_id": 897,
+          "category": "creative_writing",
+          "loss": 2.492753267288208,
+          "answer_tokens": 65
+        },
+        {
+          "row_id": 939,
+          "category": "brainstorming",
+          "loss": 2.6009912490844727,
+          "answer_tokens": 161
+        },
+        {
+          "row_id": 970,
+          "category": "classification",
+          "loss": 2.0683183670043945,
+          "answer_tokens": 25
+        },
+        {
+          "row_id": 1009,
+          "category": "general_qa",
+          "loss": 3.201561212539673,
+          "answer_tokens": 111
+        },
+        {
+          "row_id": 1055,
+          "category": "open_qa",
+          "loss": 2.7935948371887207,
+          "answer_tokens": 20
+        },
+        {
+          "row_id": 1056,
+          "category": "general_qa",
+          "loss": 3.161543607711792,
+          "answer_tokens": 177
+        },
+        {
+          "row_id": 1068,
+          "category": "general_qa",
+          "loss": 2.3286914825439453,
+          "answer_tokens": 378
+        },
+        {
+          "row_id": 1126,
+          "category": "classification",
+          "loss": 0.3195001780986786,
+          "answer_tokens": 47
+        },
+        {
+          "row_id": 1152,
+          "category": "brainstorming",
+          "loss": 0.71907639503479,
+          "answer_tokens": 68
+        },
+        {
+          "row_id": 1199,
+          "category": "closed_qa",
+          "loss": 0.26898613572120667,
+          "answer_tokens": 12
+        },
+        {
+          "row_id": 1290,
+          "category": "closed_qa",
+          "loss": 2.2276759147644043,
+          "answer_tokens": 27
+        },
+        {
+          "row_id": 1352,
+          "category": "creative_writing",
+          "loss": 2.468053102493286,
+          "answer_tokens": 38
+        },
+        {
+          "row_id": 1366,
+          "category": "open_qa",
+          "loss": 2.7638795375823975,
+          "answer_tokens": 154
+        },
+        {
+          "row_id": 1398,
+          "category": "classification",
+          "loss": 0.576813280582428,
+          "answer_tokens": 83
+        },
+        {
+          "row_id": 1465,
+          "category": "general_qa",
+          "loss": 2.1917378902435303,
+          "answer_tokens": 41
+        },
+        {
+          "row_id": 1495,
+          "category": "information_extraction",
+          "loss": 1.4026825428009033,
+          "answer_tokens": 65
+        },
+        {
+          "row_id": 1531,
+          "category": "classification",
+          "loss": 0.24091550707817078,
+          "answer_tokens": 37
+        },
+        {
+          "row_id": 1535,
+          "category": "closed_qa",
+          "loss": 0.6040238738059998,
+          "answer_tokens": 33
+        },
+        {
+          "row_id": 1549,
+          "category": "information_extraction",
+          "loss": 1.2275750637054443,
+          "answer_tokens": 20
+        },
+        {
+          "row_id": 1613,
+          "category": "closed_qa",
+          "loss": 0.11044175177812576,
+          "answer_tokens": 60
+        },
+        {
+          "row_id": 1768,
+          "category": "closed_qa",
+          "loss": 1.942196249961853,
+          "answer_tokens": 48
+        },
+        {
+          "row_id": 2008,
+          "category": "closed_qa",
+          "loss": 0.6238911151885986,
+          "answer_tokens": 29
+        },
+        {
+          "row_id": 2023,
+          "category": "open_qa",
+          "loss": 2.5200464725494385,
+          "answer_tokens": 95
+        },
+        {
+          "row_id": 2053,
+          "category": "creative_writing",
+          "loss": 1.8574429750442505,
+          "answer_tokens": 89
+        },
+        {
+          "row_id": 2069,
+          "category": "summarization",
+          "loss": 0.9133689999580383,
+          "answer_tokens": 114
+        },
+        {
+          "row_id": 2155,
+          "category": "information_extraction",
+          "loss": 1.5886586904525757,
+          "answer_tokens": 58
+        },
+        {
+          "row_id": 2230,
+          "category": "closed_qa",
+          "loss": 2.190113067626953,
+          "answer_tokens": 61
+        },
+        {
+          "row_id": 2275,
+          "category": "information_extraction",
+          "loss": 0.28556665778160095,
+          "answer_tokens": 25
+        },
+        {
+          "row_id": 2373,
+          "category": "closed_qa",
+          "loss": 0.615885317325592,
+          "answer_tokens": 22
+        },
+        {
+          "row_id": 2534,
+          "category": "creative_writing",
+          "loss": 2.293760061264038,
+          "answer_tokens": 130
+        },
+        {
+          "row_id": 2543,
+          "category": "creative_writing",
+          "loss": 2.5927579402923584,
+          "answer_tokens": 257
+        },
+        {
+          "row_id": 2552,
+          "category": "information_extraction",
+          "loss": 0.38303983211517334,
+          "answer_tokens": 12
+        },
+        {
+          "row_id": 2650,
+          "category": "creative_writing",
+          "loss": 2.500107765197754,
+          "answer_tokens": 259
+        },
+        {
+          "row_id": 2669,
+          "category": "general_qa",
+          "loss": 1.8567343950271606,
+          "answer_tokens": 47
+        },
+        {
+          "row_id": 2723,
+          "category": "classification",
+          "loss": 2.1901345252990723,
+          "answer_tokens": 10
+        },
+        {
+          "row_id": 2752,
+          "category": "brainstorming",
+          "loss": 6.14966344833374,
+          "answer_tokens": 15
+        },
+        {
+          "row_id": 2889,
+          "category": "summarization",
+          "loss": 2.8761470317840576,
+          "answer_tokens": 96
+        },
+        {
+          "row_id": 2977,
+          "category": "summarization",
+          "loss": 0.13187529146671295,
+          "answer_tokens": 61
+        },
+        {
+          "row_id": 3015,
+          "category": "open_qa",
+          "loss": 0.7660436630249023,
+          "answer_tokens": 97
+        },
+        {
+          "row_id": 3184,
+          "category": "open_qa",
+          "loss": 2.6123239994049072,
+          "answer_tokens": 296
+        },
+        {
+          "row_id": 3208,
+          "category": "summarization",
+          "loss": 0.3226417601108551,
+          "answer_tokens": 30
+        },
+        {
+          "row_id": 3254,
+          "category": "information_extraction",
+          "loss": 1.3759335279464722,
+          "answer_tokens": 22
+        },
+        {
+          "row_id": 3546,
+          "category": "summarization",
+          "loss": 1.3031789064407349,
+          "answer_tokens": 26
+        },
+        {
+          "row_id": 3628,
+          "category": "summarization",
+          "loss": 2.333444356918335,
+          "answer_tokens": 14
+        },
+        {
+          "row_id": 3726,
+          "category": "brainstorming",
+          "loss": 3.43798828125,
+          "answer_tokens": 111
+        },
+        {
+          "row_id": 3899,
+          "category": "classification",
+          "loss": 0.5416461825370789,
+          "answer_tokens": 27
+        },
+        {
+          "row_id": 4084,
+          "category": "brainstorming",
+          "loss": 4.392141342163086,
+          "answer_tokens": 26
+        },
+        {
+          "row_id": 4090,
+          "category": "brainstorming",
+          "loss": 1.8499479293823242,
+          "answer_tokens": 59
+        },
+        {
+          "row_id": 4324,
+          "category": "summarization",
+          "loss": 0.26817816495895386,
+          "answer_tokens": 51
+        }
+      ],
+      "training_curve": [
+        {
+          "round": 0,
+          "unique_examples": 10,
+          "token_exposures": 3549,
+          "curriculum_validation_nll": 3.5106346756219864
+        },
+        {
+          "round": 1,
+          "unique_examples": 17,
+          "token_exposures": 6153,
+          "curriculum_validation_nll": 2.4664590721949935
+        },
+        {
+          "round": 2,
+          "unique_examples": 24,
+          "token_exposures": 7785,
+          "curriculum_validation_nll": 1.819381922017783
+        },
+        {
+          "round": 3,
+          "unique_examples": 31,
+          "token_exposures": 10011,
+          "curriculum_validation_nll": 1.6524725640192628
+        },
+        {
+          "round": 4,
+          "unique_examples": 38,
+          "token_exposures": 11673,
+          "curriculum_validation_nll": 1.6313829362625256
+        },
+        {
+          "round": 5,
+          "unique_examples": 45,
+          "token_exposures": 13404,
+          "curriculum_validation_nll": 1.6801298577338457
+        },
+        {
+          "round": 6,
+          "unique_examples": 52,
+          "token_exposures": 15264,
+          "curriculum_validation_nll": 1.7305879587074742
+        },
+        {
+          "round": 7,
+          "unique_examples": 59,
+          "token_exposures": 17709,
+          "curriculum_validation_nll": 1.7316208954434842
+        },
+        {
+          "round": 8,
+          "unique_examples": 66,
+          "token_exposures": 19356,
+          "curriculum_validation_nll": 1.723797827551607
+        },
+        {
+          "round": 9,
+          "unique_examples": 73,
+          "token_exposures": 21066,
+          "curriculum_validation_nll": 1.7928897505626082
+        },
+        {
+          "round": 10,
+          "unique_examples": 80,
+          "token_exposures": 22887,
+          "curriculum_validation_nll": 1.8070746298180893
+        },
+        {
+          "round": 11,
+          "unique_examples": 87,
+          "token_exposures": 24690,
+          "curriculum_validation_nll": 1.8088766747387126
+        },
+        {
+          "round": 12,
+          "unique_examples": 94,
+          "token_exposures": 26325,
+          "curriculum_validation_nll": 1.973905376973562
+        },
+        {
+          "round": 13,
+          "unique_examples": 100,
+          "token_exposures": 28176,
+          "curriculum_validation_nll": 1.7837346123997122
+        }
+      ],
+      "unique_examples_by_category": {
+        "closed_qa": 12,
+        "general_qa": 16,
+        "brainstorming": 18,
+        "summarization": 13,
+        "information_extraction": 7,
+        "open_qa": 12,
+        "classification": 8,
+        "creative_writing": 14
+      },
+      "api_cost_toman": {
+        "generation": 320745.50399999996,
+        "verification": 71423.83199999998
+      },
+      "training_core_sha256": "252aef2bdff3679bd6dea0f8ff3bf5b6cdbccd2a1cbf385ef81549c924f6c714",
+      "state_sha256": "599cc101db770fdd27a3d3f7f3db2b912940bd5543ccdaeb31d30f5b9207395b",
+      "weights_sha256": "da385dd457709a5af66096b8db7b86f03da49c0ccb785fcf476e756761600da6",
+      "validation_sha256": "fca325e0c9e8918e0a306f5488779d49671b07bff4192f67e421c6eaea196949",
+      "saved_bank_inventory": {
+        "accepted": 130,
+        "categories": {
+          "general_qa": 25,
+          "open_qa": 15,
+          "creative_writing": 21,
+          "classification": 7,
+          "summarization": 14,
+          "brainstorming": 22,
+          "closed_qa": 16,
+          "information_extraction": 10
+        }
+      }
+    },
+    "sol61_loss": {
+      "unique_training_examples": 100,
+      "evaluation_examples": 64,
+      "macro_nll": 1.9163927029221668,
+      "token_weighted_nll": 2.2817154914203357,
+      "answer_token_exposures": 27822,
+      "optimizer_updates": 111,
+      "training_presentations": 417,
+      "replay_batch_slots": 39,
+      "untrained_admissions": 1,
+      "base_identity": "aa7a948697d2b584119286a44328686e5fdd4295bd6f07bc291b70f71f91cac2",
+      "label": "GPT-6.1 loss",
+      "categories": {
+        "general_qa": 2.4271894991397858,
+        "open_qa": 2.4959360882639885,
+        "classification": 1.1976133361458778,
+        "creative_writing": 2.650811493396759,
+        "summarization": 1.1249082535505295,
+        "information_extraction": 1.1006633673678152,
+        "brainstorming": 3.1223605945706367,
+        "closed_qa": 1.2116589909419417
+      },
+      "evaluation_rows": [
+        {
+          "row_id": 401,
+          "category": "general_qa",
+          "loss": 1.8462499380111694,
+          "answer_tokens": 66
+        },
+        {
+          "row_id": 455,
+          "category": "open_qa",
+          "loss": 2.6716482639312744,
+          "answer_tokens": 145
+        },
+        {
+          "row_id": 467,
+          "category": "classification",
+          "loss": 1.3756933212280273,
+          "answer_tokens": 5
+        },
+        {
+          "row_id": 489,
+          "category": "creative_writing",
+          "loss": 3.0458734035491943,
+          "answer_tokens": 299
+        },
+        {
+          "row_id": 529,
+          "category": "summarization",
+          "loss": 1.3256639242172241,
+          "answer_tokens": 79
+        },
+        {
+          "row_id": 547,
+          "category": "general_qa",
+          "loss": 1.4732433557510376,
+          "answer_tokens": 30
+        },
+        {
+          "row_id": 572,
+          "category": "classification",
+          "loss": 2.3526217937469482,
+          "answer_tokens": 4
+        },
+        {
+          "row_id": 613,
+          "category": "information_extraction",
+          "loss": 0.005129036959260702,
+          "answer_tokens": 6
+        },
+        {
+          "row_id": 638,
+          "category": "brainstorming",
+          "loss": 3.434913158416748,
+          "answer_tokens": 76
+        },
+        {
+          "row_id": 701,
+          "category": "information_extraction",
+          "loss": 2.2553317546844482,
+          "answer_tokens": 36
+        },
+        {
+          "row_id": 742,
+          "category": "open_qa",
+          "loss": 2.2613189220428467,
+          "answer_tokens": 25
+        },
+        {
+          "row_id": 750,
+          "category": "general_qa",
+          "loss": 2.874924659729004,
+          "answer_tokens": 82
+        },
+        {
+          "row_id": 788,
+          "category": "creative_writing",
+          "loss": 3.550896644592285,
+          "answer_tokens": 86
+        },
+        {
+          "row_id": 849,
+          "category": "open_qa",
+          "loss": 3.1198551654815674,
+          "answer_tokens": 109
+        },
+        {
+          "row_id": 877,
+          "category": "brainstorming",
+          "loss": 2.27001690864563,
+          "answer_tokens": 48
+        },
+        {
+          "row_id": 897,
+          "category": "creative_writing",
+          "loss": 2.5020673274993896,
+          "answer_tokens": 65
+        },
+        {
+          "row_id": 939,
+          "category": "brainstorming",
+          "loss": 2.702564239501953,
+          "answer_tokens": 161
+        },
+        {
+          "row_id": 970,
+          "category": "classification",
+          "loss": 2.1459529399871826,
+          "answer_tokens": 25
+        },
+        {
+          "row_id": 1009,
+          "category": "general_qa",
+          "loss": 3.2532432079315186,
+          "answer_tokens": 111
+        },
+        {
+          "row_id": 1055,
+          "category": "open_qa",
+          "loss": 2.850526809692383,
+          "answer_tokens": 20
+        },
+        {
+          "row_id": 1056,
+          "category": "general_qa",
+          "loss": 3.2887122631073,
+          "answer_tokens": 177
+        },
+        {
+          "row_id": 1068,
+          "category": "general_qa",
+          "loss": 2.429753303527832,
+          "answer_tokens": 378
+        },
+        {
+          "row_id": 1126,
+          "category": "classification",
+          "loss": 0.3969000279903412,
+          "answer_tokens": 47
+        },
+        {
+          "row_id": 1152,
+          "category": "brainstorming",
+          "loss": 0.6745830178260803,
+          "answer_tokens": 68
+        },
+        {
+          "row_id": 1199,
+          "category": "closed_qa",
+          "loss": 0.6592897772789001,
+          "answer_tokens": 12
+        },
+        {
+          "row_id": 1290,
+          "category": "closed_qa",
+          "loss": 2.3188509941101074,
+          "answer_tokens": 27
+        },
+        {
+          "row_id": 1352,
+          "category": "creative_writing",
+          "loss": 2.59321665763855,
+          "answer_tokens": 38
+        },
+        {
+          "row_id": 1366,
+          "category": "open_qa",
+          "loss": 2.898888349533081,
+          "answer_tokens": 154
+        },
+        {
+          "row_id": 1398,
+          "category": "classification",
+          "loss": 0.6113204956054688,
+          "answer_tokens": 83
+        },
+        {
+          "row_id": 1465,
+          "category": "general_qa",
+          "loss": 2.246429443359375,
+          "answer_tokens": 41
+        },
+        {
+          "row_id": 1495,
+          "category": "information_extraction",
+          "loss": 1.273951530456543,
+          "answer_tokens": 65
+        },
+        {
+          "row_id": 1531,
+          "category": "classification",
+          "loss": 0.2670891582965851,
+          "answer_tokens": 37
+        },
+        {
+          "row_id": 1535,
+          "category": "closed_qa",
+          "loss": 0.7030207514762878,
+          "answer_tokens": 33
+        },
+        {
+          "row_id": 1549,
+          "category": "information_extraction",
+          "loss": 1.3875739574432373,
+          "answer_tokens": 20
+        },
+        {
+          "row_id": 1613,
+          "category": "closed_qa",
+          "loss": 0.09712963551282883,
+          "answer_tokens": 60
+        },
+        {
+          "row_id": 1768,
+          "category": "closed_qa",
+          "loss": 2.285032272338867,
+          "answer_tokens": 48
+        },
+        {
+          "row_id": 2008,
+          "category": "closed_qa",
+          "loss": 0.6715838313102722,
+          "answer_tokens": 29
+        },
+        {
+          "row_id": 2023,
+          "category": "open_qa",
+          "loss": 2.578770637512207,
+          "answer_tokens": 95
+        },
+        {
+          "row_id": 2053,
+          "category": "creative_writing",
+          "loss": 1.9489002227783203,
+          "answer_tokens": 89
+        },
+        {
+          "row_id": 2069,
+          "category": "summarization",
+          "loss": 0.9348520040512085,
+          "answer_tokens": 114
+        },
+        {
+          "row_id": 2155,
+          "category": "information_extraction",
+          "loss": 1.718119740486145,
+          "answer_tokens": 58
+        },
+        {
+          "row_id": 2230,
+          "category": "closed_qa",
+          "loss": 2.2286317348480225,
+          "answer_tokens": 61
+        },
+        {
+          "row_id": 2275,
+          "category": "information_extraction",
+          "loss": 0.33597153425216675,
+          "answer_tokens": 25
+        },
+        {
+          "row_id": 2373,
+          "category": "closed_qa",
+          "loss": 0.7297329306602478,
+          "answer_tokens": 22
+        },
+        {
+          "row_id": 2534,
+          "category": "creative_writing",
+          "loss": 2.3482718467712402,
+          "answer_tokens": 130
+        },
+        {
+          "row_id": 2543,
+          "category": "creative_writing",
+          "loss": 2.659790277481079,
+          "answer_tokens": 257
+        },
+        {
+          "row_id": 2552,
+          "category": "information_extraction",
+          "loss": 0.3633376657962799,
+          "answer_tokens": 12
+        },
+        {
+          "row_id": 2650,
+          "category": "creative_writing",
+          "loss": 2.5574755668640137,
+          "answer_tokens": 259
+        },
+        {
+          "row_id": 2669,
+          "category": "general_qa",
+          "loss": 2.00495982170105,
+          "answer_tokens": 47
+        },
+        {
+          "row_id": 2723,
+          "category": "classification",
+          "loss": 1.7416273355484009,
+          "answer_tokens": 10
+        },
+        {
+          "row_id": 2752,
+          "category": "brainstorming",
+          "loss": 6.214025020599365,
+          "answer_tokens": 15
+        },
+        {
+          "row_id": 2889,
+          "category": "summarization",
+          "loss": 2.8024938106536865,
+          "answer_tokens": 96
+        },
+        {
+          "row_id": 2977,
+          "category": "summarization",
+          "loss": 0.13230767846107483,
+          "answer_tokens": 61
+        },
+        {
+          "row_id": 3015,
+          "category": "open_qa",
+          "loss": 0.8707579970359802,
+          "answer_tokens": 97
+        },
+        {
+          "row_id": 3184,
+          "category": "open_qa",
+          "loss": 2.7157225608825684,
+          "answer_tokens": 296
+        },
+        {
+          "row_id": 3208,
+          "category": "summarization",
+          "loss": 0.39227864146232605,
+          "answer_tokens": 30
+        },
+        {
+          "row_id": 3254,
+          "category": "information_extraction",
+          "loss": 1.465891718864441,
+          "answer_tokens": 22
+        },
+        {
+          "row_id": 3546,
+          "category": "summarization",
+          "loss": 1.3166563510894775,
+          "answer_tokens": 26
+        },
+        {
+          "row_id": 3628,
+          "category": "summarization",
+          "loss": 1.7887990474700928,
+          "answer_tokens": 14
+        },
+        {
+          "row_id": 3726,
+          "category": "brainstorming",
+          "loss": 3.291691303253174,
+          "answer_tokens": 111
+        },
+        {
+          "row_id": 3899,
+          "category": "classification",
+          "loss": 0.6897016167640686,
+          "answer_tokens": 27
+        },
+        {
+          "row_id": 4084,
+          "category": "brainstorming",
+          "loss": 4.387366771697998,
+          "answer_tokens": 26
+        },
+        {
+          "row_id": 4090,
+          "category": "brainstorming",
+          "loss": 2.0037243366241455,
+          "answer_tokens": 59
+        },
+        {
+          "row_id": 4324,
+          "category": "summarization",
+          "loss": 0.3062145709991455,
+          "answer_tokens": 51
+        }
+      ],
+      "training_curve": [
+        {
+          "round": 0,
+          "unique_examples": 10,
+          "token_exposures": 3549
+        },
+        {
+          "round": 1,
+          "unique_examples": 17,
+          "token_exposures": 6105
+        },
+        {
+          "round": 2,
+          "unique_examples": 24,
+          "token_exposures": 7770
+        },
+        {
+          "round": 3,
+          "unique_examples": 31,
+          "token_exposures": 10191
+        },
+        {
+          "round": 4,
+          "unique_examples": 38,
+          "token_exposures": 11901
+        },
+        {
+          "round": 5,
+          "unique_examples": 45,
+          "token_exposures": 13542
+        },
+        {
+          "round": 6,
+          "unique_examples": 52,
+          "token_exposures": 15339
+        },
+        {
+          "round": 7,
+          "unique_examples": 59,
+          "token_exposures": 16872
+        },
+        {
+          "round": 8,
+          "unique_examples": 66,
+          "token_exposures": 18585
+        },
+        {
+          "round": 9,
+          "unique_examples": 73,
+          "token_exposures": 20910
+        },
+        {
+          "round": 10,
+          "unique_examples": 80,
+          "token_exposures": 22680
+        },
+        {
+          "round": 11,
+          "unique_examples": 87,
+          "token_exposures": 24894
+        },
+        {
+          "round": 12,
+          "unique_examples": 94,
+          "token_exposures": 26472
+        },
+        {
+          "round": 13,
+          "unique_examples": 100,
+          "token_exposures": 27822
+        }
+      ],
+      "unique_examples_by_category": {
+        "closed_qa": 9,
+        "general_qa": 16,
+        "brainstorming": 18,
+        "summarization": 13,
+        "information_extraction": 5,
+        "open_qa": 13,
+        "classification": 9,
+        "creative_writing": 17
+      },
+      "api_cost_toman": {
+        "generation": 338048.882,
+        "verification": 79726.818
+      },
+      "training_core_sha256": "252aef2bdff3679bd6dea0f8ff3bf5b6cdbccd2a1cbf385ef81549c924f6c714",
+      "state_sha256": "7f334a858b80e3f915acf0726933a786203d5a6bec4686b21b4a42d90f95d5b9",
+      "weights_sha256": "2e94af711a64f68dc5485b84113ea98b2692361802a10f7906b7ee88d3e84489",
+      "validation_sha256": "4bd73b9393df7b01ef172d305a951f0f7ce02df86bbaab1d69a298db01edd562",
+      "saved_bank_inventory": {
+        "accepted": 130,
+        "categories": {
+          "creative_writing": 27,
+          "general_qa": 25,
+          "open_qa": 17,
+          "classification": 9,
+          "summarization": 14,
+          "brainstorming": 22,
+          "closed_qa": 10,
+          "information_extraction": 6
+        }
+      }
+    },
+    "luna_validation": {
+      "unique_training_examples": 100,
+      "evaluation_examples": 64,
+      "macro_nll": 1.9249573145061731,
+      "token_weighted_nll": 2.372873805786856,
+      "answer_token_exposures": 26976,
+      "optimizer_updates": 111,
+      "training_presentations": 417,
+      "replay_batch_slots": 39,
+      "untrained_admissions": 1,
+      "base_identity": "aa7a948697d2b584119286a44328686e5fdd4295bd6f07bc291b70f71f91cac2",
+      "label": "Luna validation",
+      "categories": {
+        "general_qa": 2.512521415948868,
+        "open_qa": 2.4779393896460533,
+        "classification": 0.9035961087793112,
+        "creative_writing": 2.8426773250102997,
+        "summarization": 1.1252248156815767,
+        "information_extraction": 1.112427718937397,
+        "brainstorming": 3.174403242766857,
+        "closed_qa": 1.2508684992790222
+      },
+      "evaluation_rows": [
+        {
+          "row_id": 401,
+          "category": "general_qa",
+          "loss": 1.8119672536849976,
+          "answer_tokens": 66
+        },
+        {
+          "row_id": 455,
+          "category": "open_qa",
+          "loss": 2.843924045562744,
+          "answer_tokens": 145
+        },
+        {
+          "row_id": 467,
+          "category": "classification",
+          "loss": 1.04104483127594,
+          "answer_tokens": 5
+        },
+        {
+          "row_id": 489,
+          "category": "creative_writing",
+          "loss": 3.1606452465057373,
+          "answer_tokens": 299
+        },
+        {
+          "row_id": 529,
+          "category": "summarization",
+          "loss": 1.2447516918182373,
+          "answer_tokens": 79
+        },
+        {
+          "row_id": 547,
+          "category": "general_qa",
+          "loss": 1.2536627054214478,
+          "answer_tokens": 30
+        },
+        {
+          "row_id": 572,
+          "category": "classification",
+          "loss": 0.17932942509651184,
+          "answer_tokens": 4
+        },
+        {
+          "row_id": 613,
+          "category": "information_extraction",
+          "loss": 0.14421960711479187,
+          "answer_tokens": 6
+        },
+        {
+          "row_id": 638,
+          "category": "brainstorming",
+          "loss": 3.7237913608551025,
+          "answer_tokens": 76
+        },
+        {
+          "row_id": 701,
+          "category": "information_extraction",
+          "loss": 2.2352421283721924,
+          "answer_tokens": 36
+        },
+        {
+          "row_id": 742,
+          "category": "open_qa",
+          "loss": 2.1770358085632324,
+          "answer_tokens": 25
+        },
+        {
+          "row_id": 750,
+          "category": "general_qa",
+          "loss": 3.020382881164551,
+          "answer_tokens": 82
+        },
+        {
+          "row_id": 788,
+          "category": "creative_writing",
+          "loss": 3.9805407524108887,
+          "answer_tokens": 86
+        },
+        {
+          "row_id": 849,
+          "category": "open_qa",
+          "loss": 3.2646055221557617,
+          "answer_tokens": 109
+        },
+        {
+          "row_id": 877,
+          "category": "brainstorming",
+          "loss": 2.344464063644409,
+          "answer_tokens": 48
+        },
+        {
+          "row_id": 897,
+          "category": "creative_writing",
+          "loss": 2.491570234298706,
+          "answer_tokens": 65
+        },
+        {
+          "row_id": 939,
+          "category": "brainstorming",
+          "loss": 2.8311941623687744,
+          "answer_tokens": 161
+        },
+        {
+          "row_id": 970,
+          "category": "classification",
+          "loss": 2.132659673690796,
+          "answer_tokens": 25
+        },
+        {
+          "row_id": 1009,
+          "category": "general_qa",
+          "loss": 3.513798236846924,
+          "answer_tokens": 111
+        },
+        {
+          "row_id": 1055,
+          "category": "open_qa",
+          "loss": 2.4588286876678467,
+          "answer_tokens": 20
+        },
+        {
+          "row_id": 1056,
+          "category": "general_qa",
+          "loss": 3.470593214035034,
+          "answer_tokens": 177
+        },
+        {
+          "row_id": 1068,
+          "category": "general_qa",
+          "loss": 2.4731106758117676,
+          "answer_tokens": 378
+        },
+        {
+          "row_id": 1126,
+          "category": "classification",
+          "loss": 0.3385191559791565,
+          "answer_tokens": 47
+        },
+        {
+          "row_id": 1152,
+          "category": "brainstorming",
+          "loss": 0.6656808257102966,
+          "answer_tokens": 68
+        },
+        {
+          "row_id": 1199,
+          "category": "closed_qa",
+          "loss": 0.8390071988105774,
+          "answer_tokens": 12
+        },
+        {
+          "row_id": 1290,
+          "category": "closed_qa",
+          "loss": 2.537625312805176,
+          "answer_tokens": 27
+        },
+        {
+          "row_id": 1352,
+          "category": "creative_writing",
+          "loss": 2.8786349296569824,
+          "answer_tokens": 38
+        },
+        {
+          "row_id": 1366,
+          "category": "open_qa",
+          "loss": 2.8841397762298584,
+          "answer_tokens": 154
+        },
+        {
+          "row_id": 1398,
+          "category": "classification",
+          "loss": 0.5719989538192749,
+          "answer_tokens": 83
+        },
+        {
+          "row_id": 1465,
+          "category": "general_qa",
+          "loss": 2.3289003372192383,
+          "answer_tokens": 41
+        },
+        {
+          "row_id": 1495,
+          "category": "information_extraction",
+          "loss": 1.3693102598190308,
+          "answer_tokens": 65
+        },
+        {
+          "row_id": 1531,
+          "category": "classification",
+          "loss": 0.14366431534290314,
+          "answer_tokens": 37
+        },
+        {
+          "row_id": 1535,
+          "category": "closed_qa",
+          "loss": 0.7756516337394714,
+          "answer_tokens": 33
+        },
+        {
+          "row_id": 1549,
+          "category": "information_extraction",
+          "loss": 1.2112572193145752,
+          "answer_tokens": 20
+        },
+        {
+          "row_id": 1613,
+          "category": "closed_qa",
+          "loss": 0.2274048924446106,
+          "answer_tokens": 60
+        },
+        {
+          "row_id": 1768,
+          "category": "closed_qa",
+          "loss": 2.341477155685425,
+          "answer_tokens": 48
+        },
+        {
+          "row_id": 2008,
+          "category": "closed_qa",
+          "loss": 0.516240656375885,
+          "answer_tokens": 29
+        },
+        {
+          "row_id": 2023,
+          "category": "open_qa",
+          "loss": 2.5029637813568115,
+          "answer_tokens": 95
+        },
+        {
+          "row_id": 2053,
+          "category": "creative_writing",
+          "loss": 2.1903555393218994,
+          "answer_tokens": 89
+        },
+        {
+          "row_id": 2069,
+          "category": "summarization",
+          "loss": 1.1550840139389038,
+          "answer_tokens": 114
+        },
+        {
+          "row_id": 2155,
+          "category": "information_extraction",
+          "loss": 1.801693320274353,
+          "answer_tokens": 58
+        },
+        {
+          "row_id": 2230,
+          "category": "closed_qa",
+          "loss": 2.2208251953125,
+          "answer_tokens": 61
+        },
+        {
+          "row_id": 2275,
+          "category": "information_extraction",
+          "loss": 0.3191957175731659,
+          "answer_tokens": 25
+        },
+        {
+          "row_id": 2373,
+          "category": "closed_qa",
+          "loss": 0.5487159490585327,
+          "answer_tokens": 22
+        },
+        {
+          "row_id": 2534,
+          "category": "creative_writing",
+          "loss": 2.5467283725738525,
+          "answer_tokens": 130
+        },
+        {
+          "row_id": 2543,
+          "category": "creative_writing",
+          "loss": 2.772066354751587,
+          "answer_tokens": 257
+        },
+        {
+          "row_id": 2552,
+          "category": "information_extraction",
+          "loss": 0.3472956418991089,
+          "answer_tokens": 12
+        },
+        {
+          "row_id": 2650,
+          "category": "creative_writing",
+          "loss": 2.720877170562744,
+          "answer_tokens": 259
+        },
+        {
+          "row_id": 2669,
+          "category": "general_qa",
+          "loss": 2.2277560234069824,
+          "answer_tokens": 47
+        },
+        {
+          "row_id": 2723,
+          "category": "classification",
+          "loss": 2.0507287979125977,
+          "answer_tokens": 10
+        },
+        {
+          "row_id": 2752,
+          "category": "brainstorming",
+          "loss": 5.669442176818848,
+          "answer_tokens": 15
+        },
+        {
+          "row_id": 2889,
+          "category": "summarization",
+          "loss": 2.858090400695801,
+          "answer_tokens": 96
+        },
+        {
+          "row_id": 2977,
+          "category": "summarization",
+          "loss": 0.12690795958042145,
+          "answer_tokens": 61
+        },
+        {
+          "row_id": 3015,
+          "category": "open_qa",
+          "loss": 0.8723053336143494,
+          "answer_tokens": 97
+        },
+        {
+          "row_id": 3184,
+          "category": "open_qa",
+          "loss": 2.8197121620178223,
+          "answer_tokens": 296
+        },
+        {
+          "row_id": 3208,
+          "category": "summarization",
+          "loss": 0.5113760232925415,
+          "answer_tokens": 30
+        },
+        {
+          "row_id": 3254,
+          "category": "information_extraction",
+          "loss": 1.471207857131958,
+          "answer_tokens": 22
+        },
+        {
+          "row_id": 3546,
+          "category": "summarization",
+          "loss": 1.401598572731018,
+          "answer_tokens": 26
+        },
+        {
+          "row_id": 3628,
+          "category": "summarization",
+          "loss": 1.3399903774261475,
+          "answer_tokens": 14
+        },
+        {
+          "row_id": 3726,
+          "category": "brainstorming",
+          "loss": 3.476032257080078,
+          "answer_tokens": 111
+        },
+        {
+          "row_id": 3899,
+          "category": "classification",
+          "loss": 0.7708237171173096,
+          "answer_tokens": 27
+        },
+        {
+          "row_id": 4084,
+          "category": "brainstorming",
+          "loss": 4.510074138641357,
+          "answer_tokens": 26
+        },
+        {
+          "row_id": 4090,
+          "category": "brainstorming",
+          "loss": 2.174546957015991,
+          "answer_tokens": 59
+        },
+        {
+          "row_id": 4324,
+          "category": "summarization",
+          "loss": 0.36399948596954346,
+          "answer_tokens": 51
+        }
+      ],
+      "training_curve": [
+        {
+          "round": 0,
+          "unique_examples": 10,
+          "token_exposures": 3549,
+          "curriculum_validation_nll": 3.5106346756219864
+        },
+        {
+          "round": 1,
+          "unique_examples": 17,
+          "token_exposures": 5835,
+          "curriculum_validation_nll": 2.4283973844721913
+        },
+        {
+          "round": 2,
+          "unique_examples": 24,
+          "token_exposures": 7239,
+          "curriculum_validation_nll": 1.803934005787596
+        },
+        {
+          "round": 3,
+          "unique_examples": 31,
+          "token_exposures": 9531,
+          "curriculum_validation_nll": 1.6394353598589078
+        },
+        {
+          "round": 4,
+          "unique_examples": 38,
+          "token_exposures": 11721,
+          "curriculum_validation_nll": 1.660679020511452
+        },
+        {
+          "round": 5,
+          "unique_examples": 45,
+          "token_exposures": 13668,
+          "curriculum_validation_nll": 1.7003287737024948
+        },
+        {
+          "round": 6,
+          "unique_examples": 52,
+          "token_exposures": 15249,
+          "curriculum_validation_nll": 1.740839502075687
+        },
+        {
+          "round": 7,
+          "unique_examples": 59,
+          "token_exposures": 16611,
+          "curriculum_validation_nll": 1.7021570312790573
+        },
+        {
+          "round": 8,
+          "unique_examples": 66,
+          "token_exposures": 18771,
+          "curriculum_validation_nll": 1.7515848252223805
+        },
+        {
+          "round": 9,
+          "unique_examples": 73,
+          "token_exposures": 20445,
+          "curriculum_validation_nll": 1.7733821748988703
+        },
+        {
+          "round": 10,
+          "unique_examples": 80,
+          "token_exposures": 22218,
+          "curriculum_validation_nll": 1.8243184472667053
+        },
+        {
+          "round": 11,
+          "unique_examples": 87,
+          "token_exposures": 24459,
+          "curriculum_validation_nll": 1.802005164558068
+        },
+        {
+          "round": 12,
+          "unique_examples": 94,
+          "token_exposures": 25914,
+          "curriculum_validation_nll": 1.892293599783443
+        },
+        {
+          "round": 13,
+          "unique_examples": 100,
+          "token_exposures": 26976,
+          "curriculum_validation_nll": 1.8991686080116779
+        }
+      ],
+      "unique_examples_by_category": {
+        "closed_qa": 12,
+        "general_qa": 16,
+        "brainstorming": 18,
+        "summarization": 13,
+        "information_extraction": 7,
+        "open_qa": 12,
+        "classification": 8,
+        "creative_writing": 14
+      },
+      "api_cost_toman": {
+        "generation": 16640.547000000002,
+        "verification": 73647.932
+      },
+      "training_core_sha256": "252aef2bdff3679bd6dea0f8ff3bf5b6cdbccd2a1cbf385ef81549c924f6c714",
+      "state_sha256": "689ccb2dcda1a48104795979dcb464e07969473c061d6d106c947e7bf64e3780",
+      "weights_sha256": "e1f67b5a36bcbee3fb1a6ae132ec6ab187b4165b12df71d17d243935aa5b0405",
+      "validation_sha256": "49748022233b3a157557f0966cf58fca6c12c749cb0f80e213dfb8e403eb0f72",
+      "saved_bank_inventory": {
+        "accepted": 130,
+        "categories": {
+          "general_qa": 25,
+          "open_qa": 15,
+          "creative_writing": 21,
+          "classification": 7,
+          "summarization": 14,
+          "brainstorming": 22,
+          "closed_qa": 16,
+          "information_extraction": 10
+        }
+      }
+    }
+  },
+  "total_api_cost_toman": 900233.5150000004,
+  "token_matched": false,
+  "final_test_scored": false,
+  "local_validation_guided_result": null,
+  "limitations": [
+    "One seed",
+    "64 reused development examples",
+    "Unequal token exposure and updates",
+    "No final-test scoring",
+    "No blinded generated-answer assessment",
+    "Integration code has changed since the measured study"
+  ]
+}
