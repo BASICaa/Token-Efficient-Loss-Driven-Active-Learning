@@ -234,7 +234,21 @@ Explicitly start all prepared local training runs:
 ```
 
 Rerun the same command to resume committed checkpoints. No API options or keys
-are needed. To inspect incomplete/completed results without training:
+are needed. The PowerShell launcher starts each unfinished arm in a fresh Python
+process, releasing its CUDA context before loading the next model. Completed
+arms are skipped after checking their plan identity and resource totals; the
+fingerprinted training code, saved plans and experiment settings are unchanged.
+This avoids carrying model/optimizer/allocator memory across a multi-arm process.
+If an individual run still exceeds available GPU memory, it stops at its last
+committed checkpoint; the launcher does not change batch sizes or cut answers.
+
+Show the complete run inventory without Python, model loading or training:
+
+```powershell
+.\run_selection_comparison.ps1 -StatusOnly
+```
+
+To generate reports for incomplete/completed results without training:
 
 ```powershell
 .\run_selection_comparison.ps1 -Output outputs/selection-diagnostic-dolly -ReportOnly

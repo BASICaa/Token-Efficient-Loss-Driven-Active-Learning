@@ -93,3 +93,18 @@ The new diagnostic is a one-pass, length-conditional development ablation,
 with optional history-replay contrasts. It does not claim equivalence to the
 historical three-epoch recipe or its threshold/cooldown replay policy. Actual
 quantized-Gemma training and diagnostic quality remain to be measured by the user.
+
+## October 20: GPU-memory isolation for the active sweep
+
+The user completed four of nine prepared runs before a CUDA out-of-memory error
+in seed 43's loss arm, whose last committed update is 12/25. The sweep launcher
+now runs each unfinished arm in a fresh Python process and checks/skips completed
+states without reloading their models. No training implementation, plan, token
+schedule, model settings or measured checkpoint was modified. `-StatusOnly`
+reads the inventory without invoking Python.
+
+Five additional PowerShell tests use a fake Python command to check the exact
+five pending arm invocations followed by reporting, status/report-only behavior,
+failure-stop behavior and changed-identity rejection. These checks do not train
+the actual model or establish that an individual arm can fit every possible GPU
+memory condition. Existing checkpoint recovery semantics remain unchanged.
