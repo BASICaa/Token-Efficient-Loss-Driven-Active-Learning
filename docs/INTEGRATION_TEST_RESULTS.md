@@ -108,3 +108,25 @@ five pending arm invocations followed by reporting, status/report-only behavior,
 failure-stop behavior and changed-identity rejection. These checks do not train
 the actual model or establish that an individual arm can fit every possible GPU
 memory condition. Existing checkpoint recovery semantics remain unchanged.
+
+## October 20: seed-42 replay pilot preparation
+
+Added a separate replay-study preparer, with **11 offline tests** for immutable
+control reuse, incompatible state/resource/warmup/replay/evaluation rejection,
+changed training code, adapter integrity, optimizer/initial-score parity and
+multi-seed expansion. These plus the five existing mocked launcher checks pass
+(**16 passed**). The fingerprinted training implementation was not modified.
+
+Actual local preparation verified the seed-42 completed random/loss/validation
+controls and imported their unchanged measurements into a separate replay plan.
+Each imported state records its source identity and source-state fingerprint.
+The source plan/bank/protocol fingerprints, per-update answer tokens, warmup,
+initial evaluation, LR/reset traces, evaluation IDs and saved adapter hashes
+passed checks. The source files and adapters were retained in place.
+
+The prepared plan has three reused completed controls and **six pending runs**
+(random/guided replay crossed with three selection methods), 25 updates and
+18,422 complete answer-token exposures per run. A report-only execution reads
+the imported controls successfully; the launcher reports 3/9 complete and 6
+remaining. No model loading, training, API calls or new model scoring occurred.
+The seed-42 replay pilot remains unmeasured and must be started by the user.

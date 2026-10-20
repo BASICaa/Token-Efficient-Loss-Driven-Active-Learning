@@ -65,6 +65,21 @@ This replay control does **not** reproduce the older 0.35 threshold, two-use cap
 and cooldown rule. It is a separately identified history-replay experiment.
 Preparation rejects replay studies with no available matching-length opportunity.
 
+`prepare_replay_study.py` extends a completed selection-only study in a separate
+directory. Before reusing no-replay controls it checks code/bank/protocol
+fingerprints, each completed state's original plan identity, total and per-update
+resources, no-repeat traces, warmup IDs, initial evaluations, executed LR/reset
+traces, evaluation row IDs and adapter integrity. The copied states retain their
+source-state fingerprint and original identity in `reused_control`; the new plan
+records all control lineage. Scores are imported unchanged. Adapters remain at
+their original paths, so retain the source directory. No new evaluations, model
+loading or provider calls occur during preparation.
+
+The first pilot uses seed 42, with three imported controls and six new runs,
+each of 25 updates and 18,422 answer-token exposures. It is a development
+investigation chosen after inspecting the earlier selection-only results.
+Record that sequencing; do not call it an independent confirmatory study.
+
 ## Diagnostics
 
 Before any training, and after the shared warmup and each fixed update milestone,

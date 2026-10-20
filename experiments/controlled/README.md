@@ -254,6 +254,31 @@ To generate reports for incomplete/completed results without training:
 .\run_selection_comparison.ps1 -Output outputs/selection-diagnostic-dolly -ReportOnly
 ```
 
+For the next **seed-42 replay pilot**, reuse the already completed, compatible
+no-replay controls without training them again:
+
+```powershell
+python prepare_replay_study.py --source outputs/selection-diagnostic-dolly --output outputs/replay-diagnostic-dolly-seed42 --seeds 42
+.\run_selection_comparison.ps1 -Output outputs/replay-diagnostic-dolly-seed42
+```
+
+Preparation validates unchanged training code, source bank/protocol, executed
+token schedule, shared warmup, initial scores, LR/reset traces, evaluation IDs and
+saved adapters before importing three completed controls with source fingerprints.
+The new plan has nine conditions: three reused controls and **six new training
+runs**, each with 25 updates and the same 18,422-token budget. Random versus
+guided replay is crossed with all three selection policies. New unique counts
+can be smaller than 100 because replay replaces fresh data under equal exposure.
+The original study is kept intact; keep it on disk because reused states reference
+its saved adapters. Reuse is explicitly identified in each imported state.
+
+The seed-42 plan has been prepared locally; run the second command directly.
+For a later three-seed expansion use a fresh output, e.g.
+`--output outputs/replay-diagnostic-dolly-all --seeds 42 43 44` (18 new runs).
+Do not run both replay outputs concurrently. The launcher starts each unfinished
+condition in a fresh process. Reports include the reused no-replay controls and
+within-selection replay contrasts. No provider requests or API keys are involved.
+
 Preparation alternatives (use a fresh output directory for each design):
 
 - `--seeds 42` for a one-seed runtime pilot; default three seeds for comparison.
