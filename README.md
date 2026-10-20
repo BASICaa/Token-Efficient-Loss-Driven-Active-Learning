@@ -25,6 +25,12 @@ or paid API calls were started while preparing it.
 
 ## Beta application and historical prototype study
 
+The fresh [selection diagnostic design](docs/SELECTION_DIAGNOSTIC_DESIGN.md) adds
+random/loss/validation selection under identical banks, warmup batches and
+per-update answer-token budgets, with optional separate replay contrasts and
+training-health reports. See [preparation and run commands](experiments/controlled/README.md#new-controlled-selection-comparison-and-diagnostic-reports).
+These tools do not change or replace the measured snapshots above.
+
 The documentation below describes the beta application and the older
 `comparison_data/` snapshot. Those results are separate from the new study above.
 

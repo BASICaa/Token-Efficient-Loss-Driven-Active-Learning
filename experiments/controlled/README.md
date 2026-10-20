@@ -206,6 +206,67 @@ applicable; its 16 fixtures are a regression check, not a correctness guarantee.
 Provider rates/options are recorded historical settings and should be reviewed
 before future paid studies.
 
+## New controlled selection comparison and diagnostic reports
+
+See [the full design](../../docs/SELECTION_DIAGNOSTIC_DESIGN.md). These are new
+development runs with full-answer supervision and exact per-update token/update
+matching. Each method chooses among candidates with the same required answer
+length; inspect reported choice capacity before interpreting selection effects.
+Historical training code and completed studies remain unchanged.
+
+Prepare the original-Dolly-pool comparison (local tokenizer/input reads only):
+
+```powershell
+conda activate hf-agents
+python run_selection_diagnostic.py prepare --output outputs/selection-diagnostic-dolly --dataset "D:\path\to\dolly_train.jsonl" --model "D:\path\to\gemma-4-E2B-it"
+```
+
+Default: seeds 42/43/44; random, loss-guided and validation-guided selection;
+replay off; 25 optimizer updates of four complete examples (100 unique examples),
+including two shared warmup updates; 64 rows in each evaluation view. Total
+answer tokens are frozen and printed during preparation for each seed. This is
+a one-pass selection diagnostic, not the historical three-epoch recipe.
+
+Explicitly start all prepared local training runs:
+
+```powershell
+.\run_selection_comparison.ps1 -Output outputs/selection-diagnostic-dolly
+```
+
+Rerun the same command to resume committed checkpoints. No API options or keys
+are needed. To inspect incomplete/completed results without training:
+
+```powershell
+.\run_selection_comparison.ps1 -Output outputs/selection-diagnostic-dolly -ReportOnly
+```
+
+Preparation alternatives (use a fresh output directory for each design):
+
+- `--seeds 42` for a one-seed runtime pilot; default three seeds for comparison.
+- `--replay-ablation` for nine arms per seed: three selection policies crossed
+  with replay off/random/guided. These isolate the replay contrasts separately.
+- `--candidate-bank outputs/banks/sol61-validation.json` to use that exact saved
+  verified synthetic bank for every arm. No replenishment or generation occurs.
+- `--optimizer-lifecycle continuous` to compare persistent Adam/scheduler state
+  against the default common round resets in a separate study.
+
+`diagnostic_summary.json`, `DIAGNOSTIC_REPORT.md`, learning-curve plots and
+optimizer-health plots summarize the new runs. Per-arm `state.json` records all
+fixed probe curves, selection traces, exposure and health metrics. Training-probe
+loss is measured on fixed rows; changing-batch training losses are logged but are
+not treated as a comparable generalization curve. Checkpoint selection is always
+the final equal-budget checkpoint; no automatic stopping or rollback is enabled.
+
+Summarize existing completed runs without model loading or API requests:
+
+```powershell
+python selection_report.py --existing-comparison outputs/corrected-recovery-900k/comparison.json --output outputs/existing-run-diagnostics
+```
+
+This report reconstructs available category/replay exposure and curriculum
+curves, and marks unrecorded initial scores, fixed probes and gradient/LR traces
+as unavailable. Original results are never rewritten.
+
 ## Safeguards, outputs and tests
 
 - Independent curriculum, comparison and final-test roles; no raw held-out text

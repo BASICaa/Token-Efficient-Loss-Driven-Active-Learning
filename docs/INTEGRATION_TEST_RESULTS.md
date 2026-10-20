@@ -55,3 +55,41 @@ The credential bootstrap has seven additional offline tests covering explicit
 suppression of key output, and forwarding only to the recovery entry point.
 It is separate from the fingerprinted training code so prepared recovery plans
 and saved adapters retain their existing identities.
+
+## October 20: matched selection and diagnostics
+
+The controlled suite passes **184 tests, with the same one historical-input
+skip**. Twelve new tests cover exact full-answer token/update matching across all
+nine selection/replay combinations, identical warmup batches, random-feedback
+isolation, guided replay ranking, parity of instrumented updates with the
+original optimizer, nonfinite rejection, fixed probes and final-test isolation,
+completed-run reuse, bank tamper rejection, resource-report integrity and
+historical reporting including Windows UTF-8 BOM input.
+
+Both reset-per-round and continuous optimizer/scheduler lifecycles pass exact
+CPU-fixture interruption/restart checks. After the full-suite run, the new
+12-test suite was rerun for the fixed shared-warmup probe. Its end-to-end test
+was additionally rerun with figure generation enabled; learning curves and
+gradient/LR plots were visually inspected. These are fixture checks, not new
+Gemma results. The root application and original controlled engine were unchanged.
+
+The real local-data **preparation only** produced a fresh Dolly bank of 12,641
+usable, distinct candidates, 25 full-answer updates and 100 unique examples per
+replay-off arm. Seeds 42/43/44 have frozen token budgets 18,422/15,978/16,309,
+respectively; all methods within each seed share the same budget. The plan
+fingerprint matches the finalized code. It starts no model training or API calls.
+Exact-length constraints leave 13/8/10 post-warmup slots with only one eligible
+candidate out of 92 slots per seed; report choice capacity before interpreting
+selection differences.
+
+A separate report was reconstructed from all six completed historical runs,
+including category/replay token exposure and available curriculum curves.
+Missing initial scores, fixed-probe curves and optimizer-health traces are
+explicitly unavailable. Graph colors were checked for consistent category
+mapping. Runtime banks, prepared plans, local paths and graphs remain under
+ignored `outputs/`; only code, tests and design documentation are published.
+
+The new diagnostic is a one-pass, length-conditional development ablation,
+with optional history-replay contrasts. It does not claim equivalence to the
+historical three-epoch recipe or its threshold/cooldown replay policy. Actual
+quantized-Gemma training and diagnostic quality remain to be measured by the user.
