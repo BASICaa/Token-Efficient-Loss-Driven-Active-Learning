@@ -9,6 +9,9 @@ param(
 $ErrorActionPreference = "Stop"
 Push-Location $PSScriptRoot
 try {
+    if (-not $PrepareOnly -and [string]::IsNullOrWhiteSpace($env:HIBANA_API_KEY)) {
+        throw "HIBANA_API_KEY is missing in this PowerShell session. Set it locally before running recovery; do not paste it into chat. No training or API calls were started."
+    }
     $conditions = @(
         @{Name="sol61-loss-bank"; Bank="outputs/banks/sol61-loss.json"; Profile=$null},
         @{Name="luna-validation-bank"; Bank="outputs/banks/luna-validation.json"; Profile="experiment_design_2026-10-18/recovery_luna_generation.json"}

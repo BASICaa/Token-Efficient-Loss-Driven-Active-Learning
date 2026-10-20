@@ -145,7 +145,17 @@ conda activate hf-agents
 ```
 
 Run from this controlled directory with `HIBANA_API_KEY` configured locally.
-This command starts real training and may make paid calls. Add `-PrepareOnly`
+The recovery launcher checks the process environment before loading the model.
+It does not automatically read a `.env` file. To enter a key for this PowerShell
+session without displaying it or saving it as a global variable:
+
+```powershell
+$hibanaKey = Read-Host "Hibana API key" -AsSecureString
+$env:HIBANA_API_KEY = [System.Net.NetworkCredential]::new("", $hibanaKey).Password
+Remove-Variable hibanaKey
+```
+
+The recovery launcher starts real training and may make paid calls. Add `-PrepareOnly`
 to create the recovery forks without loading model weights or making API calls.
 The original six-condition launcher remains strictly offline for saved banks.
 
