@@ -129,6 +129,49 @@ progress, without automatically purchasing more examples.
 
 ## Explicit live generation
 
+### Opt-in recovery of a depleted saved bank
+
+The October 20 loss-guided saved-bank pilot reached 94/100 examples and exhausted
+its closed-QA and summarization categories. `run_remaining_with_recovery.ps1`
+continues that arm and runs/resumes Luna using saved examples first, generating
+and verifying only category deficits. The authorized **900,000-toman total cap**
+is shared across both recovery arms, including verification and failed requests
+as accounted by the provider ledger. It is a local cost ceiling, not a wallet
+balance or an instruction to spend the full amount.
+
+```powershell
+conda activate hf-agents
+.\run_remaining_with_recovery.ps1 -TeacherBudgetToman 900000
+```
+
+Run from this controlled directory with `HIBANA_API_KEY` configured locally.
+This command starts real training and may make paid calls. Add `-PrepareOnly`
+to create the recovery forks without loading model weights or making API calls.
+The original six-condition launcher remains strictly offline for saved banks.
+
+Recovery outputs go under `outputs/corrected-recovery-900k/`. The existing four
+completed results are retained; new continuations have their own code identity,
+source-state fingerprint and original-bank fingerprint. The 94 trained examples
+and adapter are inherited without repeating completed rounds. Keep the original
+output directories in place: the fork references their immutable adapters.
+Luna replenishment uses its historical generation profile, with the original
+GPT-6.1 verifier. Teacher identity must match the bank export manifest.
+
+Replenishment retains category quotas, replay, selection RNG, training settings
+and the original 64 evaluation rows. Each missing slot has at most four generation
+attempts, with format, leakage, encoding, duplicate and verifier checks. Accepted
+samples are saved before training and reused on restart. No fallback is applied
+to dataset-only methods. Rejected/unselected candidates still contribute cost.
+
+These are **amended development pilots using saved data plus replenishment**,
+not pure fixed-bank experiments. `recovery_result.json` records newly accepted
+and newly trained counts, category counts and cost. Once both remaining arms
+finish, the recovery launcher's `comparison.json` combines all six final scores.
+Rerun the same command after interruption; it reuses its recovery plan and state.
+The original study, candidate banks and historical published results are retained.
+
+### Fully live generation
+
 With `api-validation` or `api-loss`, omitting `--candidate-bank` requires both
 `--allow-paid-api` and an explicit total `--teacher-budget-toman`. Those flags
 start real paid requests and training. Local and saved-bank modes reject paid
