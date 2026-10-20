@@ -49,3 +49,9 @@ subclass pins its additional code in a new identity and records source lineage.
 The user authorized a new shared ceiling of **900,000 toman** for these recovery
 arms. Actual API availability, credit, real-model continuation and resulting
 quality remain untested; paid calls and training are left to the user's command.
+
+The credential bootstrap has seven additional offline tests covering explicit
+`.env` loading, BOM/quoted values, process precedence, missing/empty keys,
+suppression of key output, and forwarding only to the recovery entry point.
+It is separate from the fingerprinted training code so prepared recovery plans
+and saved adapters retain their existing identities.

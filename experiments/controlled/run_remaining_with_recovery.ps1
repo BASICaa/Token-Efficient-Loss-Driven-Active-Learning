@@ -3,14 +3,21 @@ param(
     [Parameter(Mandatory = $true)][ValidateRange(1, 900000)][double]$TeacherBudgetToman,
     [string]$Source = "outputs/corrected-comparison-100",
     [string]$Output = "outputs/corrected-recovery-900k",
+    [string]$EnvFile,
     [switch]$PrepareOnly
 )
 
 $ErrorActionPreference = "Stop"
 Push-Location $PSScriptRoot
 try {
-    if (-not $PrepareOnly -and [string]::IsNullOrWhiteSpace($env:HIBANA_API_KEY)) {
-        throw "HIBANA_API_KEY is missing in this PowerShell session. Set it locally before running recovery; do not paste it into chat. No training or API calls were started."
+    if ($EnvFile) { $EnvFile = (Resolve-Path -LiteralPath $EnvFile).Path }
+    if (-not $PrepareOnly) {
+        if ($EnvFile) {
+            & python recovery_env.py --env-file $EnvFile --check
+            if ($LASTEXITCODE -ne 0) { throw "Credential check failed. No training or API calls were started." }
+        } elseif ([string]::IsNullOrWhiteSpace($env:HIBANA_API_KEY)) {
+            throw "HIBANA_API_KEY is missing in this PowerShell session. Use -EnvFile with your existing .env file, or set the session variable. No training or API calls were started."
+        }
     }
     $conditions = @(
         @{Name="sol61-loss-bank"; Bank="outputs/banks/sol61-loss.json"; Profile=$null},
@@ -36,7 +43,11 @@ try {
             if ($LASTEXITCODE -ne 0) { throw "Recovery preparation failed: $($condition.Name)." }
         }
         if (-not $PrepareOnly) {
-            & python run_bank_recovery.py run --output $outputPath --allow-paid-api --teacher-budget-toman $TeacherBudgetToman
+            if ($EnvFile) {
+                & python recovery_env.py --env-file $EnvFile -- run --output $outputPath --allow-paid-api --teacher-budget-toman $TeacherBudgetToman
+            } else {
+                & python run_bank_recovery.py run --output $outputPath --allow-paid-api --teacher-budget-toman $TeacherBudgetToman
+            }
             if ($LASTEXITCODE -ne 0) {
                 throw "Recovery stopped: $($condition.Name). Check the error; accepted candidates and committed rounds are preserved. Rerun with the same settings to resume."
             }

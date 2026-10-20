@@ -145,9 +145,19 @@ conda activate hf-agents
 ```
 
 Run from this controlled directory with `HIBANA_API_KEY` configured locally.
-The recovery launcher checks the process environment before loading the model.
-It does not automatically read a `.env` file. To enter a key for this PowerShell
-session without displaying it or saving it as a global variable:
+Use an existing `.env` file directly with the explicit `-EnvFile` option:
+
+```powershell
+.\run_remaining_with_recovery.ps1 -TeacherBudgetToman 900000 -EnvFile "D:\path\to\.env"
+```
+
+Only `HIBANA_API_KEY` is loaded, in the recovery child process. Its value is never
+printed or saved as a global environment variable. A nonempty session variable
+has precedence over the file. Credential availability is checked before loading
+the model; recovery code identities and existing plans are unchanged by this
+credential bootstrap.
+
+Alternatively, enter a key for this PowerShell session:
 
 ```powershell
 $hibanaKey = Read-Host "Hibana API key" -AsSecureString
