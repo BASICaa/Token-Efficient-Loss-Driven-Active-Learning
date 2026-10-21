@@ -281,6 +281,33 @@ within-selection replay contrasts. No provider requests or API keys are involved
 
 Preparation alternatives (use a fresh output directory for each design):
 
+For the small **continuous-optimizer pilot**, prepare a single random-selection,
+replay-off run against its already completed reset-per-round control:
+
+```powershell
+python prepare_optimizer_study.py prepare --source outputs/selection-diagnostic-dolly --output outputs/optimizer-continuous-seed42 --seed 42
+.\run_continuous_optimizer.ps1
+```
+
+The seed-42 plan has been prepared locally: **one new run**, 25 updates, 100
+unique examples, 18,422 answer-token exposures and the same 64 evaluation rows.
+Use the dedicated `run_continuous_optimizer.ps1` launcher, not the three-selection
+sweep launcher. It explicitly runs random selection only, without replay, then
+produces `OPTIMIZER_REPORT.md`, `optimizer_comparison.json` and a comparison plot.
+Rerun the same command to resume model **and optimizer/scheduler** checkpoints.
+`-ReportOnly` reports saved progress without training.
+
+The original reset control is copied as immutable measured data with source
+fingerprints; it is never trained again. Starting weights, example identities,
+order, answer-token schedule, update count and evaluations are held fixed.
+The report verifies the executed data/order before comparing final scores.
+Continuous retains AdamW state and decays LR globally over 25 updates; the
+control resets AdamW and its local linear LR each round. This is a combined
+optimizer/LR lifecycle contrast, not an isolated test of Adam moments. Because
+random selection never consumes feedback, changed gradients cannot indirectly
+change training examples. A later TEFLD feedback run is a separate question.
+No provider requests or generation are used, and existing studies are unmodified.
+
 - `--seeds 42` for a one-seed runtime pilot; default three seeds for comparison.
 - `--replay-ablation` for nine arms per seed: three selection policies crossed
   with replay off/random/guided. These isolate the replay contrasts separately.

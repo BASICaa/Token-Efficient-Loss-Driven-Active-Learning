@@ -130,3 +130,27 @@ The prepared plan has three reused completed controls and **six pending runs**
 the imported controls successfully; the launcher reports 3/9 complete and 6
 remaining. No model loading, training, API calls or new model scoring occurred.
 The seed-42 replay pilot remains unmeasured and must be started by the user.
+
+## October 21: bounded continuous-optimizer pilot
+
+Prepared one seed-42 continuous AdamW/global-LR run using random selection and
+replay off, compared with the completed reset control. Preparation verified the
+source bank/protocol/code, control plan identity, exact update/answer-token trace,
+shared warmup, evaluation IDs and adapter integrity. The source run is retained
+unchanged and its state is copied with provenance; the new run starts from the
+original base and seed, not the trained control. No training implementation was
+changed, so previous prepared studies keep their original fingerprints.
+
+Eight new offline tests cover one-run preparation, source immutability, exact
+data/order comparison, report/figure generation, invalid resource/initial-score/
+identity/control rejection and mocked dedicated-launcher dispatch. These plus
+the two existing exact interruption/restart tests for reset and continuous
+optimizer state pass (**10 passed**), using tiny CPU fixture models only.
+
+Actual preparation created one pending 25-update run with 100 unique examples
+and 18,422 answer tokens; its dedicated report-only launcher returns "not
+started; remaining_runs: 1". No actual model training, evaluation or API calls
+were performed. This intentionally small test measures AdamW and LR lifecycle
+together on a fixed random curriculum; it does not isolate optimizer moments
+or establish an adaptive-TEFLD effect. Actual quantized GPU execution remains
+for the user's explicit run command.

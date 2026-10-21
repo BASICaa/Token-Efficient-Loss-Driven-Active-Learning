@@ -106,6 +106,24 @@ optimizer checkpoints are fingerprinted. Changing lifecycle requires a fresh
 study directory. This comparison changes optimizer history **and the LR schedule
 lifecycle together**; it does not isolate Adam moments alone.
 
+### Small optimizer pilot
+
+`prepare_optimizer_study.py` prepares a **single seed-42 random-selection,
+replay-off continuous run**, reusing the completed reset run only as a measured
+comparison. Its schedule and bank are copied without retokenizing or generating
+data. Compatibility gates verify source code, protocol, bank, control state,
+warmup, per-update resources, evaluation IDs and adapter integrity. Control state
+and plan fingerprints are retained. No trained weights or optimizer state from
+the reset control initialize the new run: it starts with the same base and seed.
+
+Use the dedicated `run_continuous_optimizer.ps1` launcher to avoid starting the
+full three-selection sweep. It performs one 25-update, 100-example run with
+18,422 answer tokens. Random selection fixes candidate IDs/order independently
+of gradients and feedback. The report rejects any executed-data/order mismatch
+and compares only the final matched-budget checkpoint. A one-seed result applies
+to this optimizer/LR recipe and fixed curriculum, not automatically to adaptive
+TEFLD or other seeds. This bounded pilot reflects the user's hardware constraint.
+
 Only the final fixed-budget checkpoint is compared. Intermediate checkpoint
 scores are diagnostic and cannot choose training examples, stop training, tune
 the current run or select a favored checkpoint. The final test stays locked.
