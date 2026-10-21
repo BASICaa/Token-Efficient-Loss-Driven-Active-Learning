@@ -281,6 +281,51 @@ within-selection replay contrasts. No provider requests or API keys are involved
 
 Preparation alternatives (use a fresh output directory for each design):
 
+### Validation-guided replay pilot
+
+The prior seed-42 validation-selection/random-replay run had **22 of 23 replay
+slots with only one eligible candidate**, owing to exact answer-length matching.
+Those scores alone provide little evidence about the replay ranking policy.
+The older guided selector also consumed a different number of RNG draws from
+random replay, which could change subsequent new-example sampling. Do not
+attribute the old score differences solely to choosing better replay examples.
+
+The new pilot therefore uses **two fresh matched runs**: validation-guided
+new-example selection plus random replay, versus the same new-example policy
+plus validation-guided replay. A common eight-example warmup places two task
+categories at each replay length. Every replay slot must have at least two
+eligible categories; forced single-category tests are rejected.
+
+```powershell
+python run_validation_replay.py prepare --source outputs/selection-diagnostic-dolly --output outputs/validation-replay-seed42 --seed 42
+.\run_validation_replay.ps1
+```
+
+This plan is already prepared locally. Run only the second command. Both runs
+use seed 42, 25 updates and **16,640 answer-token exposures**, with 77 unique
+training examples and 23 replay presentations. Validation replay samples a
+category proportional to its curriculum-validation mean NLL among available
+same-length trained examples, then samples an example uniformly in that category.
+It does not use per-example training loss to choose replay items, and validation
+examples themselves never enter training. It need not pick the globally weakest
+category when that category has no eligible same-length training example.
+
+Independent replay RNG preserves the random-replay draw stream used for new
+examples, preventing extra category draws from incidentally shifting new-example
+selection. Different learning feedback can still change later adaptive choices;
+that is part of the replay-policy intervention. Both arms retain the same
+warmup, complete-answer token/update schedule, optimizer resets, evaluation IDs
+and final-checkpoint rule. Their changed warmup/schedule means the old replay
+scores are context only, not directly reused controls.
+
+The separate extension pins its own code identity and leaves the original engine
+and prepared studies unchanged. Use `run_validation_replay.ps1`, not the generic
+selection launcher. Each policy runs in a fresh process; repeat the command to
+resume, or add `-ReportOnly` to inspect saved progress. Outputs are
+`VALIDATION_REPLAY_REPORT.md`, `validation_replay_comparison.json`, a comparison
+plot and per-slot traces of category weights, probabilities and choice counts.
+No API keys, paid calls, generation, rollback or final-holdout scoring are used.
+
 For the small **continuous-optimizer pilot**, prepare a single random-selection,
 replay-off run against its already completed reset-per-round control:
 

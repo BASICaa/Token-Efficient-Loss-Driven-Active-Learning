@@ -82,6 +82,41 @@ Record that sequencing; do not call it an independent confirmatory study.
 
 ## Diagnostics
 
+### Follow-up: validation-guided replay with meaningful choices
+
+Inspecting the old validation-selection/random-replay trace found that 22/23
+replay slots had only one same-length candidate. This severely restricts what
+that pilot can say about replay guidance. Its random and high-training-loss
+policies also consume different RNG draws before new-example sampling. Differences
+in their final scores must not be attributed solely to replay ranking.
+
+`run_validation_replay.py` introduces a separate, fingerprinted two-run extension
+without changing the original engine on disk. Both arms use validation category
+feedback for new examples. Replay is either uniform over eligible trained
+candidates, or category-weighted by curriculum-validation mean NLL and then
+uniform within category. Per-example training NLL is logged but not used for the
+new validation replay choice. Held-out validation examples are never trained.
+
+A fresh warmup consists of four same-answer-length pairs from different
+categories. Replay lengths cycle over these anchors, guaranteeing at least two
+eligible categories at every replay slot; the selector rejects a forced
+single-category case. New-example lengths outside the replay slot retain the
+source schedule. This changes the old warmup and total exposure, so two new
+matched controls are required; old replay scores are contextual only.
+
+The seed-42 pilot has 25 updates, 16,640 answer-token exposures, 77 unique
+examples and 23 repeated presentations per arm. Exact length still constrains
+which validation weaknesses can be targeted. Replay token shares and individual
+IDs can be reconstructed from the canonical slot traces; example counts are
+not token shares. It is a one-seed development test, not a confirmed improvement.
+
+New-example RNG consumes the same base random-replay stream in both arms;
+validation replay category/within-category draws use an independent seeded
+stream. Thus extra replay draws alone cannot shift the new-example RNG. Model
+feedback can still change subsequent new-data choices as the two trajectories
+learn differently. Reports verify plan identities, matched resources and shared
+initial evaluations/warmup, and show actual replay-category choice counts.
+
 Before any training, and after the shared warmup and each fixed update milestone,
 every arm scores the same fixed training probe, curriculum view and checkpoint
 validation view. The default is eight examples per category (64 rows) in each

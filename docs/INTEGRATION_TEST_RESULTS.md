@@ -154,3 +154,34 @@ were performed. This intentionally small test measures AdamW and LR lifecycle
 together on a fixed random curriculum; it does not isolate optimizer moments
 or establish an adaptive-TEFLD effect. Actual quantized GPU execution remains
 for the user's explicit run command.
+
+## October 21: validation-category replay preparation
+
+Review of the completed validation-selection/random-replay trace found that
+**22/23 replay slots had a single candidate** under exact-length matching.
+The old random/guided selectors also consume different RNG draws before new
+candidate sampling. These are material interpretation limits of that replay
+pilot, not evidence of a proven ranking-policy advantage.
+
+Prepared a fresh two-run seed-42 comparison with validation-guided new examples
+in both arms and random versus validation-category-weighted replay. The fresh
+warmup contains four equal-length pairs across all eight categories, guaranteeing
+at least two eligible categories for every replay slot. The old scores are not
+imported as controls, because the warmup and token schedule changed. Each new
+run has 25 updates, 16,640 full-answer tokens, 77 unique examples and 23 repeated
+presentations. These counts are not claims of measured quality.
+
+The extension pins its additional code identity and installs selector hooks only
+inside its worker context; the original engine files and run identities stay
+unchanged. New-example draws use the base random-replay stream while validation
+replay uses independent seeded draws. Replay logs include curriculum category
+weights, selected-category probability and actual category/candidate choices.
+Training loss never chooses replay items in the validation arm.
+
+Fourteen offline tests cover validation preference and training-loss isolation,
+random-replay signal isolation, RNG-stream independence, finite-feedback gates,
+single-category rejection, balanced schedule construction, two matched fixture
+runs/report plots, exact interruption recovery, hook restoration, tamper rejection
+and mocked two-process/report-only launcher dispatch. All use tiny CPU models
+or fake Python commands. Actual preparation and report-only execution loaded no
+model, trained nothing and made no API calls; two real runs remain pending.
