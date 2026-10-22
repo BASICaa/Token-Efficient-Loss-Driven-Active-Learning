@@ -24,3 +24,19 @@ logs/
 runs/
 outputs/
 
+# Controlled experiments: publish compact numeric snapshots under results/ only.
+**/.env
+**/.env.*
+!**/.env.example
+!**/.env.hibana.example
+**/.pytest_tmp*/
+**/experiment_runs*/
+**/optimizer_diagnostic_*/
+**/huggingface_data/
+**/outputs/
+experiments/controlled/data/
+experiments/controlled/models/
+experiments/controlled/TEFLD/data/
+experiments/controlled/TEFLD/Models/
+*.tmp
+

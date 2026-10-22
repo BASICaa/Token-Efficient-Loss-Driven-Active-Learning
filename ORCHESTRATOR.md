@@ -13,6 +13,7 @@ TEFLD/src/orchestrator.py
 ```text
 bootstrap section files
 load example.txt into pipeline state
+ensure shared_validation.json exists for evaluated runs
 
 if no current training batch exists:
     if an active recipe exists:
@@ -22,10 +23,11 @@ if no current training batch exists:
     else:
         ask PolicyMaker for the next recipe
 
-    ask Instructor to build the current training batch
+    ask Instructor to build the current training batch with adaptive difficulty budgets
 
 if a current training batch exists:
     train the Student LoRA adapter
+    evaluate fixed shared_validation.json for checkpoint decisions
     run Evaluator on the batch
     append results to the ledger
     rebuild the failure vault
@@ -42,6 +44,8 @@ If a run stops after batch creation, `current_training_batch` remains in `pipeli
 If a run stops after training, the adapter may already exist under `TEFLD/Models/<section_id>/round_XXX/`. If `adapter_config.json` and `training_complete.json` exist, the next run skips retraining and evaluates.
 
 If a run stops after evaluation, the ledger and vault have already been updated and the current round has advanced.
+
+Best-round and rollback decisions use the fixed shared-validation loss when `shared_validation.json` is available. This avoids choosing checkpoints based only on the just-trained 10-sample batch, which can become memorized after repeated rounds.
 
 ## Result Statuses
 
@@ -69,4 +73,3 @@ from TEFLD.src.orchestrator import Orchestrator
 result = Orchestrator().run(max_rounds=1)
 print(result)
 ```
-

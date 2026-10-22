@@ -1,0 +1,410 @@
+# Controlled TEFLD experiments
+
+This engine is isolated from the beta application's section-based `TEFLD`
+package. Run the commands below **from this directory**. This integration
+changes code; the published results describe the earlier measured version,
+whose core hash is recorded in the [numeric snapshot](../../results/five-way-100/snapshot.json).
+
+## Included methods
+
+| Mode | Training source | Curriculum feedback | Teacher calls |
+| --- | --- | --- | --- |
+| `dolly` | Original Dolly references | Balanced seeded sampling | None |
+| `local-loss` | Original Dolly references | Refreshed training losses | None |
+| `local-validation` | Original Dolly references | Separate curriculum validation | None |
+| `api-loss` | Verified synthetic examples or saved bank | Refreshed training losses | Explicit opt-in for live generation |
+| `api-validation` | Verified synthetic examples or saved bank | Separate curriculum validation | Explicit opt-in for live generation |
+
+`local-validation` is implemented and fixture-tested. It is **not** the local
+method measured in the published five-method study; that study used local loss
+feedback. No new real training has been performed for this integration.
+
+The beta application's `--validation-file` option controls whether its validation
+examples are supplied locally or generated through an API. It does not switch
+its training source to dataset-only training. These controlled modes declare
+training source and curriculum feedback separately.
+
+## Environment and local inputs
+
+Use the existing `hf-agents` Conda environment. The pinned runtime in
+`requirements-experiments.lock` describes the measured Windows/CUDA setup.
+Install the matching CUDA Torch wheel before the other pinned dependencies.
+Plotting additionally requires `requirements-results.txt`.
+
+Supply local Gemma-compatible model files and the frozen Dolly JSONL yourself.
+Automatic model downloads are disabled. The frozen split manifest is included;
+the dataset must match its declared checksum:
+
+```text
+9765d49979c37d4b96a51651c4cfb8c399169390b6f751ca43e198355eedeb2a
+```
+
+A differently serialized or updated dataset will fail closed. Do not change a
+hash to make it pass and describe the result as the same study. The legacy
+protocol templates retain historical path fields; `run_controlled.py prepare`
+replaces those fields with the explicit local paths below.
+
+## Prepare local validation-guided TEFLD
+
+```powershell
+conda activate hf-agents
+python run_controlled.py prepare --mode local-validation --dataset "D:\path\to\dolly_train.jsonl" --model "D:\path\to\gemma-4-E2B-it" --examples 100 --full-validation --output outputs/local-validation
+```
+
+Preparation loads a local tokenizer and validates a training-only warmup. It
+does not load model weights, train or make API requests. The common ten-reference
+warmup counts within the 100-example training target.
+
+`--full-validation` uses all 256 curriculum-validation and all 256 comparison-
+validation examples in their separate partitions. Without it, the earlier
+eight-per-category (64-row) views are used. The final-test partition remains
+locked. Using more validation examples defines a new experiment; it does not
+change the old published 64-row results.
+
+The following command **starts local training** when the user runs it:
+
+```powershell
+python run_controlled.py run --output outputs/local-validation
+```
+
+Use `--mode dolly` or `--mode local-loss` and separate output directories to
+prepare the corresponding controls. Settings, model identity, warmup and data
+hashes are recorded; changed settings require fresh output. The preparation
+tool uses seed 42 by default; `--seed` declares a different fresh run.
+
+## Reuse already generated data
+
+Export each teacher's saved accepted admissions as a separate private bank:
+
+```powershell
+python export_candidate_bank.py --admissions "D:\path\to\candidate_admissions.json" --output outputs/banks/sol61-validation.json
+```
+
+The exporter preserves reference answers and passing verification metadata,
+records a source fingerprint and prints category coverage. It performs no
+generation, inference or paid verification. Exported training text belongs in
+ignored `outputs/`, not in the public result snapshot.
+
+Prepare an API-derived validation selection experiment, then explicitly use
+the saved bank:
+
+```powershell
+python run_controlled.py prepare --mode api-validation --dataset "D:\path\to\dolly_train.jsonl" --model "D:\path\to\gemma-4-E2B-it" --examples 100 --full-validation --output outputs/bank-validation
+python run_controlled.py run --output outputs/bank-validation --candidate-bank outputs/banks/sol61-validation.json
+```
+
+Saved-bank execution disables the teacher network. Local format, encoding and
+protected-split leakage checks run again before training. Missing category
+coverage stops the round; there is no automatic generation fallback. This
+tests **selection over fixed synthetic data**, not live adaptive generation.
+The bank path starts from a bank-selected initial batch; the prepared shared
+Dolly warmup is used by dataset and live-generation paths, not the fixed-bank
+path. Compare like-for-like initial batches when designing a bank ablation.
+
+## Six-condition corrected-branch comparison using saved data
+
+`run_corrected_comparison.ps1` prepares and sequentially trains Dolly, local
+loss-guided TEFLD, local validation-guided TEFLD, and three saved-bank conditions:
+GPT-6.1 validation/loss and Luna validation. Export the three existing banks to
+the filenames shown above first. No generation or paid-enable flags are passed.
+
+```powershell
+conda activate hf-agents
+.\run_corrected_comparison.ps1 -Dataset "D:\path\to\dolly_train.jsonl" -Model "D:\path\to\gemma-4-E2B-it"
+```
+
+Default: 100 unique examples, seed 42, the earlier 64-row comparison validation.
+`-PrepareOnly` prepares without training. `-Examples 20 -Output outputs/smoke-20`
+is a smaller runtime test. `-FullValidation -Output outputs/full-validation-100`
+explicitly switches both validation views to all 256 rows. Use fresh outputs
+for changed settings. Completed/interrupted conditions resume on rerun.
+
+All outputs are below the selected output directory; after all six finish,
+`comparison.json` contains their scores, actual exposures and update counts.
+The initial batches for local/live versus fixed-bank paths differ as described
+above. Thus this is a new method comparison, not an isolated old-versus-new-code
+effect. Configuration/logging corrections do not guarantee an improvement in
+quality. Insufficient fixed-bank category coverage stops the round and preserves
+progress, without automatically purchasing more examples.
+
+## Explicit live generation
+
+### Opt-in recovery of a depleted saved bank
+
+The October 20 loss-guided saved-bank pilot reached 94/100 examples and exhausted
+its closed-QA and summarization categories. `run_remaining_with_recovery.ps1`
+continues that arm and runs/resumes Luna using saved examples first, generating
+and verifying only category deficits. The authorized **900,000-toman total cap**
+is shared across both recovery arms, including verification and failed requests
+as accounted by the provider ledger. It is a local cost ceiling, not a wallet
+balance or an instruction to spend the full amount.
+
+```powershell
+conda activate hf-agents
+.\run_remaining_with_recovery.ps1 -TeacherBudgetToman 900000
+```
+
+Run from this controlled directory with `HIBANA_API_KEY` configured locally.
+Use an existing `.env` file directly with the explicit `-EnvFile` option:
+
+```powershell
+.\run_remaining_with_recovery.ps1 -TeacherBudgetToman 900000 -EnvFile "D:\path\to\.env"
+```
+
+Only `HIBANA_API_KEY` is loaded, in the recovery child process. Its value is never
+printed or saved as a global environment variable. A nonempty session variable
+has precedence over the file. Credential availability is checked before loading
+the model; recovery code identities and existing plans are unchanged by this
+credential bootstrap.
+
+Alternatively, enter a key for this PowerShell session:
+
+```powershell
+$hibanaKey = Read-Host "Hibana API key" -AsSecureString
+$env:HIBANA_API_KEY = [System.Net.NetworkCredential]::new("", $hibanaKey).Password
+Remove-Variable hibanaKey
+```
+
+The recovery launcher starts real training and may make paid calls. Add `-PrepareOnly`
+to create the recovery forks without loading model weights or making API calls.
+The original six-condition launcher remains strictly offline for saved banks.
+
+Recovery outputs go under `outputs/corrected-recovery-900k/`. The existing four
+completed results are retained; new continuations have their own code identity,
+source-state fingerprint and original-bank fingerprint. The 94 trained examples
+and adapter are inherited without repeating completed rounds. Keep the original
+output directories in place: the fork references their immutable adapters.
+Luna replenishment uses its historical generation profile, with the original
+GPT-6.1 verifier. Teacher identity must match the bank export manifest.
+
+Replenishment retains category quotas, replay, selection RNG, training settings
+and the original 64 evaluation rows. Each missing slot has at most four generation
+attempts, with format, leakage, encoding, duplicate and verifier checks. Accepted
+samples are saved before training and reused on restart. No fallback is applied
+to dataset-only methods. Rejected/unselected candidates still contribute cost.
+
+These are **amended development pilots using saved data plus replenishment**,
+not pure fixed-bank experiments. `recovery_result.json` records newly accepted
+and newly trained counts, category counts and cost. Once both remaining arms
+finish, the recovery launcher's `comparison.json` combines all six final scores.
+Rerun the same command after interruption; it reuses its recovery plan and state.
+The original study, candidate banks and historical published results are retained.
+
+### Fully live generation
+
+With `api-validation` or `api-loss`, omitting `--candidate-bank` requires both
+`--allow-paid-api` and an explicit total `--teacher-budget-toman`. Those flags
+start real paid requests and training. Local and saved-bank modes reject paid
+enablement. The portable entry point uses the declared GPT-6.1 Sol Hibana
+profile; Luna-generated saved banks can also be exported and reused locally.
+
+Set `HIBANA_API_KEY` locally using `.env.hibana.example`. Keep the key out of
+command arguments. Operational ceilings are bound to each teacher identity,
+with a shared study cap, bounded requests and client pacing. A cap is not a
+wallet balance. The identity-matched historical verifier audit is reused if
+applicable; its 16 fixtures are a regression check, not a correctness guarantee.
+Provider rates/options are recorded historical settings and should be reviewed
+before future paid studies.
+
+## New controlled selection comparison and diagnostic reports
+
+See [the full design](../../docs/SELECTION_DIAGNOSTIC_DESIGN.md). These are new
+development runs with full-answer supervision and exact per-update token/update
+matching. Each method chooses among candidates with the same required answer
+length; inspect reported choice capacity before interpreting selection effects.
+Historical training code and completed studies remain unchanged.
+
+Prepare the original-Dolly-pool comparison (local tokenizer/input reads only):
+
+```powershell
+conda activate hf-agents
+python run_selection_diagnostic.py prepare --output outputs/selection-diagnostic-dolly --dataset "D:\path\to\dolly_train.jsonl" --model "D:\path\to\gemma-4-E2B-it"
+```
+
+Default: seeds 42/43/44; random, loss-guided and validation-guided selection;
+replay off; 25 optimizer updates of four complete examples (100 unique examples),
+including two shared warmup updates; 64 rows in each evaluation view. Total
+answer tokens are frozen and printed during preparation for each seed. This is
+a one-pass selection diagnostic, not the historical three-epoch recipe.
+
+Explicitly start all prepared local training runs:
+
+```powershell
+.\run_selection_comparison.ps1 -Output outputs/selection-diagnostic-dolly
+```
+
+Rerun the same command to resume committed checkpoints. No API options or keys
+are needed. The PowerShell launcher starts each unfinished arm in a fresh Python
+process, releasing its CUDA context before loading the next model. Completed
+arms are skipped after checking their plan identity and resource totals; the
+fingerprinted training code, saved plans and experiment settings are unchanged.
+This avoids carrying model/optimizer/allocator memory across a multi-arm process.
+If an individual run still exceeds available GPU memory, it stops at its last
+committed checkpoint; the launcher does not change batch sizes or cut answers.
+
+Show the complete run inventory without Python, model loading or training:
+
+```powershell
+.\run_selection_comparison.ps1 -StatusOnly
+```
+
+To generate reports for incomplete/completed results without training:
+
+```powershell
+.\run_selection_comparison.ps1 -Output outputs/selection-diagnostic-dolly -ReportOnly
+```
+
+For the next **seed-42 replay pilot**, reuse the already completed, compatible
+no-replay controls without training them again:
+
+```powershell
+python prepare_replay_study.py --source outputs/selection-diagnostic-dolly --output outputs/replay-diagnostic-dolly-seed42 --seeds 42
+.\run_selection_comparison.ps1 -Output outputs/replay-diagnostic-dolly-seed42
+```
+
+Preparation validates unchanged training code, source bank/protocol, executed
+token schedule, shared warmup, initial scores, LR/reset traces, evaluation IDs and
+saved adapters before importing three completed controls with source fingerprints.
+The new plan has nine conditions: three reused controls and **six new training
+runs**, each with 25 updates and the same 18,422-token budget. Random versus
+guided replay is crossed with all three selection policies. New unique counts
+can be smaller than 100 because replay replaces fresh data under equal exposure.
+The original study is kept intact; keep it on disk because reused states reference
+its saved adapters. Reuse is explicitly identified in each imported state.
+
+The seed-42 plan has been prepared locally; run the second command directly.
+For a later three-seed expansion use a fresh output, e.g.
+`--output outputs/replay-diagnostic-dolly-all --seeds 42 43 44` (18 new runs).
+Do not run both replay outputs concurrently. The launcher starts each unfinished
+condition in a fresh process. Reports include the reused no-replay controls and
+within-selection replay contrasts. No provider requests or API keys are involved.
+
+Preparation alternatives (use a fresh output directory for each design):
+
+### Validation-guided replay pilot
+
+The prior seed-42 validation-selection/random-replay run had **22 of 23 replay
+slots with only one eligible candidate**, owing to exact answer-length matching.
+Those scores alone provide little evidence about the replay ranking policy.
+The older guided selector also consumed a different number of RNG draws from
+random replay, which could change subsequent new-example sampling. Do not
+attribute the old score differences solely to choosing better replay examples.
+
+The new pilot therefore uses **two fresh matched runs**: validation-guided
+new-example selection plus random replay, versus the same new-example policy
+plus validation-guided replay. A common eight-example warmup places two task
+categories at each replay length. Every replay slot must have at least two
+eligible categories; forced single-category tests are rejected.
+
+```powershell
+python run_validation_replay.py prepare --source outputs/selection-diagnostic-dolly --output outputs/validation-replay-seed42 --seed 42
+.\run_validation_replay.ps1
+```
+
+This plan is already prepared locally. Run only the second command. Both runs
+use seed 42, 25 updates and **16,640 answer-token exposures**, with 77 unique
+training examples and 23 replay presentations. Validation replay samples a
+category proportional to its curriculum-validation mean NLL among available
+same-length trained examples, then samples an example uniformly in that category.
+It does not use per-example training loss to choose replay items, and validation
+examples themselves never enter training. It need not pick the globally weakest
+category when that category has no eligible same-length training example.
+
+Independent replay RNG preserves the random-replay draw stream used for new
+examples, preventing extra category draws from incidentally shifting new-example
+selection. Different learning feedback can still change later adaptive choices;
+that is part of the replay-policy intervention. Both arms retain the same
+warmup, complete-answer token/update schedule, optimizer resets, evaluation IDs
+and final-checkpoint rule. Their changed warmup/schedule means the old replay
+scores are context only, not directly reused controls.
+
+The separate extension pins its own code identity and leaves the original engine
+and prepared studies unchanged. Use `run_validation_replay.ps1`, not the generic
+selection launcher. Each policy runs in a fresh process; repeat the command to
+resume, or add `-ReportOnly` to inspect saved progress. Outputs are
+`VALIDATION_REPLAY_REPORT.md`, `validation_replay_comparison.json`, a comparison
+plot and per-slot traces of category weights, probabilities and choice counts.
+No API keys, paid calls, generation, rollback or final-holdout scoring are used.
+
+For the small **continuous-optimizer pilot**, prepare a single random-selection,
+replay-off run against its already completed reset-per-round control:
+
+```powershell
+python prepare_optimizer_study.py prepare --source outputs/selection-diagnostic-dolly --output outputs/optimizer-continuous-seed42 --seed 42
+.\run_continuous_optimizer.ps1
+```
+
+The seed-42 plan has been prepared locally: **one new run**, 25 updates, 100
+unique examples, 18,422 answer-token exposures and the same 64 evaluation rows.
+Use the dedicated `run_continuous_optimizer.ps1` launcher, not the three-selection
+sweep launcher. It explicitly runs random selection only, without replay, then
+produces `OPTIMIZER_REPORT.md`, `optimizer_comparison.json` and a comparison plot.
+Rerun the same command to resume model **and optimizer/scheduler** checkpoints.
+`-ReportOnly` reports saved progress without training.
+
+The original reset control is copied as immutable measured data with source
+fingerprints; it is never trained again. Starting weights, example identities,
+order, answer-token schedule, update count and evaluations are held fixed.
+The report verifies the executed data/order before comparing final scores.
+Continuous retains AdamW state and decays LR globally over 25 updates; the
+control resets AdamW and its local linear LR each round. This is a combined
+optimizer/LR lifecycle contrast, not an isolated test of Adam moments. Because
+random selection never consumes feedback, changed gradients cannot indirectly
+change training examples. A later TEFLD feedback run is a separate question.
+No provider requests or generation are used, and existing studies are unmodified.
+
+- `--seeds 42` for a one-seed runtime pilot; default three seeds for comparison.
+- `--replay-ablation` for nine arms per seed: three selection policies crossed
+  with replay off/random/guided. These isolate the replay contrasts separately.
+- `--candidate-bank outputs/banks/sol61-validation.json` to use that exact saved
+  verified synthetic bank for every arm. No replenishment or generation occurs.
+- `--optimizer-lifecycle continuous` to compare persistent Adam/scheduler state
+  against the default common round resets in a separate study.
+
+`diagnostic_summary.json`, `DIAGNOSTIC_REPORT.md`, learning-curve plots and
+optimizer-health plots summarize the new runs. Per-arm `state.json` records all
+fixed probe curves, selection traces, exposure and health metrics. Training-probe
+loss is measured on fixed rows; changing-batch training losses are logged but are
+not treated as a comparable generalization curve. Checkpoint selection is always
+the final equal-budget checkpoint; no automatic stopping or rollback is enabled.
+
+Summarize existing completed runs without model loading or API requests:
+
+```powershell
+python selection_report.py --existing-comparison outputs/corrected-recovery-900k/comparison.json --output outputs/existing-run-diagnostics
+```
+
+This report reconstructs available category/replay exposure and curriculum
+curves, and marks unrecorded initial scores, fixed probes and gradient/LR traces
+as unavailable. Original results are never rewritten.
+
+## Safeguards, outputs and tests
+
+- Independent curriculum, comparison and final-test roles; no raw held-out text
+  in teacher prompts.
+- Complete answer supervision and finite loss/gradient checks.
+- Original-reference provenance for local retrieval, verified admissions for
+  live generation and fixed-bank provenance for reused synthetic data.
+- Writer locks, atomic state commits, saved-adapter weight hashes and restart checks.
+- Unique-example or token accounting, replay records and per-round summaries.
+- Validated LoRA and training settings; the default recipe stays rank 4, alpha 8,
+  dropout 0.05, learning rate 0.0002, three epochs and four-example accumulation.
+- Difficulty changes, adaptive replay thresholds and rollback are not silently
+  enabled in this measured-method comparison. They remain separate beta features
+  requiring controlled ablations before promotion.
+
+New run artifacts are under the selected output's `arms/<mode>/pilot/` directory.
+`state.json` is authoritative; `round_events.json` provides a compact timeline.
+
+```powershell
+python run_controlled.py status --output outputs/local-validation
+python -m pytest tests -q
+python plot_results.py --snapshot ../../results/five-way-100/snapshot.json --output outputs/rebuilt-figures
+```
+
+The regression suite uses fixture models and no provider calls. One historical
+raw-workspace integration test is skipped in the public checkout because its
+private run inputs are intentionally not distributed. Published numeric results
+have an independent integrity test. `run_five_way_training.py` remains the
+historical workspace launcher; it requires those private historical inputs.
+Use `run_controlled.py` for fresh portable preparation.

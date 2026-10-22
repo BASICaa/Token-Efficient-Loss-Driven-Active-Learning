@@ -1,0 +1,21 @@
+# Local tested runtime: Python 3.11.15, Windows, CUDA 12.1.
+# Install the matching CUDA Torch wheel first from the official PyTorch index.
+# Direct dependencies pinned from the runtime used for the local checks.
+torch==2.5.1+cu121
+transformers==5.5.3
+peft==0.18.1
+accelerate==1.13.0
+bitsandbytes==0.49.2
+safetensors==0.7.0
+pydantic==2.13.4
+python-dotenv==1.2.2
+openai==2.45.0
+httpx==0.28.1
+numpy==2.4.4
+scikit-learn==1.8.0
+jsonschema==4.26.0
+datasets==4.8.4
+huggingface-hub==1.23.0
+tokenizers==0.22.2
+jinja2==3.1.6
+pytest==9.0.3

@@ -1,5 +1,39 @@
 # Token Efficient Loss Driven Active Learning
 
+This branch adds an isolated controlled experiment engine alongside the beta
+application. It supports **local validation-guided dataset retrieval** and
+**API validation-guided synthetic training**, including reuse of saved verified
+examples without new API calls.
+
+- [Controlled methods and commands](experiments/controlled/README.md)
+- [Integration scope and review boundaries](docs/INTEGRATION_REVIEW.md)
+- [Completed five-method study and figures](results/README.md)
+- [Machine-readable numeric results](results/five-way-100/snapshot.json)
+
+The completed study trained each method on 100 unique examples and used the same
+64 development evaluation examples. Dolly had the lowest reference-answer loss;
+local loss-guided TEFLD was close behind. Local validation-guided TEFLD is an
+available method, **not a measured result in this study**. The final holdout
+remains unscored. One seed and unequal token exposures limit the conclusions.
+
+![Five-method validation comparison](results/five-way-100/figures/validation_comparison.png)
+
+The existing beta application remains under `TEFLD/`; the controlled engine is
+under `experiments/controlled/`. Their validation roles and schemas differ.
+Review this integration before combining their internals. No new real training
+or paid API calls were started while preparing it.
+
+## Beta application and historical prototype study
+
+The fresh [selection diagnostic design](docs/SELECTION_DIAGNOSTIC_DESIGN.md) adds
+random/loss/validation selection under identical banks, warmup batches and
+per-update answer-token budgets, with optional separate replay contrasts and
+training-health reports. See [preparation and run commands](experiments/controlled/README.md#new-controlled-selection-comparison-and-diagnostic-reports).
+These tools do not change or replace the measured snapshots above.
+
+The documentation below describes the beta application and the older
+`comparison_data/` snapshot. Those results are separate from the new study above.
+
 TEFLD is a prototype active-learning loop for improving a local language model with small, high-value training batches.
 
 Instead of training on random data, TEFLD uses model loss to decide what to train next. Each round builds a 10-sample batch, trains a LoRA adapter, evaluates the student, records failures, and uses those failures to shape the next round.
@@ -194,6 +228,8 @@ After filling `example.txt`, run one full TEFLD round:
 python run_tefld.py --rounds 1
 ```
 
+On the first evaluated run, TEFLD also creates `shared_validation.json`: a fixed 10-sample validation set used for best-checkpoint and rollback decisions. You can replace that file with your own held-out samples from the same broad distribution you care about; keeping it fixed is important because training-batch loss is too easy to overfit.
+
 Run multiple rounds:
 
 ```powershell
@@ -241,6 +277,8 @@ TEFLD/data/sections/section_XXX/
 Key files:
 
 - `example.txt`: seed examples provided by the user
+- `shared_validation.json`: fixed holdout-like validation samples for checkpoint selection
+- `difficulty_config.json`: editable difficulty budgets for generation levels
 - `pipeline_state.json`: current round, active recipe, current batch, planner state
 - `OverAllData.json`: full evaluated ledger
 - `failure_vault.json`: compact high-loss memory for recycling
@@ -258,13 +296,17 @@ TEFLD/Models/section_XXX/round_YYY/
 - trainer micro-batch size: `1`
 - gradient accumulation: `4`
 - learning rate: `2e-4`
-- epochs per round: `3`
+- epochs per round: `1`
 - max sequence length: `512`
 - LoRA rank: `4`
 - LoRA alpha: `8`
 - LoRA dropout: `0.05`
 
-The student masks prompt tokens and padding tokens with `-100`, so training loss is computed only on the expected answer.
+The student masks prompt tokens and padding tokens with `-100`, so training loss is computed only on the expected answer. Checkpoint selection uses the fixed `shared_validation.json` loss when evaluation is enabled; pass `--disable-shared-validation` only if you intentionally want to fall back to training-batch loss.
+
+The policy hard-generation thresholds in [TEFLD/src/policy.py](TEFLD/src/policy.py) are currently tuned to the observed loss scale of the known configured/tested local target, `gemma-4-E2B-it`. If you switch model families or sizes, retune those constants or replace them with history/percentile-based thresholds.
+
+Difficulty is adaptive. The planner starts from a per-section `difficulty_config.json`, records requested and observed difficulty on generated samples, retries severe generation misses once, and stores the current difficulty regime in `pipeline_state.json`.
 
 ## GitHub Notes
 

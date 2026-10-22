@@ -18,6 +18,13 @@ from .dataschema import (
     User_Example,
     CommandQuery
 )
+from .difficulty import (
+    DIFFICULTY_MAX_ATTEMPTS,
+    DifficultyScore,
+    difficulty_miss_reason as difficulty_miss_reason_for_score,
+    observed_difficulty,
+    score_generated_difficulty,
+)
 from .diversity_planner import (
     DiversityPlanner,
     GenerationBlueprint,
@@ -235,6 +242,9 @@ class Instructor:
             "source": sample.source,
             "source_ledger_id": sample.source_ledger_id,
             "tag": sample.tag,
+            "requested_difficulty": sample.requested_difficulty,
+            "observed_difficulty": sample.observed_difficulty,
+            "difficulty_score": sample.difficulty_score,
             "instruct_preview": self.preview_text(sample.instruct),
             "sample_preview": self.preview_text(sample.sample),
             "gold_preview": self.preview_text(sample.gold_summary),
@@ -314,6 +324,9 @@ class Instructor:
                 source="recycled",
                 source_ledger_id=extracted_row.ledger_id,
                 tag=extracted_row.tag,
+                requested_difficulty=extracted_row.requested_difficulty,
+                observed_difficulty=extracted_row.observed_difficulty,
+                difficulty_score=extracted_row.difficulty_score,
             )
 
             recycled_samples.append(sample)
@@ -394,6 +407,7 @@ class Instructor:
         instruction: str,
         tag: str,
         tag_counts: dict[str, int] | None = None,
+        requested_difficulty: str | None = None,
     ) -> Training_Sample:
         raw_sample = self.parse_generated_json(response)
         return self.training_sample_from_generated_object(
@@ -401,6 +415,7 @@ class Instructor:
             instruction=instruction,
             tag=tag,
             tag_counts=tag_counts,
+            requested_difficulty=requested_difficulty,
         )
 
     def training_sample_from_generated_object(
@@ -409,6 +424,7 @@ class Instructor:
         instruction: str,
         tag: str,
         tag_counts: dict[str, int] | None = None,
+        requested_difficulty: str | None = None,
     ) -> Training_Sample:
         if not isinstance(raw_sample, dict):
             raise ValueError("Instructor response JSON must be an object.")
@@ -439,11 +455,18 @@ class Instructor:
 
         raw_tag = str(raw_sample.get("tag") or tag)
         canonical_tag = canonicalize_learning_tag(raw_tag, tag_counts or {})
+        difficulty_score = score_generated_difficulty(
+            sample=raw_sample_text,
+            instruct=raw_instruct,
+            output=str(gold_summary) if gold_summary is not None else None,
+        )
+        observed = observed_difficulty(difficulty_score)
 
         sample_preview = str(raw_sample["sample"]).replace("\n", " ")[:90]
         print(
             "[instructor] parsed generated sample "
-            f"tag={canonical_tag} sample='{sample_preview}'"
+            f"tag={canonical_tag} difficulty={requested_difficulty}->{observed} "
+            f"sample='{sample_preview}'"
         )
         return Training_Sample(
             sample=raw_sample_text,
@@ -451,6 +474,9 @@ class Instructor:
             gold_summary=str(gold_summary) if gold_summary is not None else None,
             source="generated",
             tag=canonical_tag,
+            requested_difficulty=requested_difficulty,
+            observed_difficulty=observed,
+            difficulty_score=difficulty_score.as_payload(),
         )
 
     def parse_generated_json(self, response: str) -> Any:
@@ -833,6 +859,41 @@ class Instructor:
 
         return True, None
 
+    def difficulty_miss_reason(self, sample: Training_Sample) -> str | None:
+        if not sample.requested_difficulty or not sample.difficulty_score:
+            return None
+        try:
+            score = DifficultyScore(**sample.difficulty_score)
+        except TypeError:
+            return None
+        return difficulty_miss_reason_for_score(
+            sample.requested_difficulty,
+            sample.observed_difficulty,
+            score,
+        )
+
+    def log_difficulty_miss(
+        self,
+        *,
+        slot: Instructor_Slot,
+        sample: Training_Sample,
+        reason: str,
+        attempt: int | None = None,
+        accepted_after_retry_limit: bool = False,
+    ) -> None:
+        append_section_debug_log(
+            self.section_id,
+            "difficulty_miss",
+            {
+                "round_id": self.pipeline.current_round,
+                "slot": slot.model_dump(mode="json"),
+                "attempt": attempt,
+                "reason": reason,
+                "accepted_after_retry_limit": accepted_after_retry_limit,
+                "sample": self.sample_debug_row(sample),
+            },
+        )
+
     def build_generation_items(
         self,
         client: Any,
@@ -989,6 +1050,7 @@ class Instructor:
                 instruction=str(item["instruction"]),
                 tag=str(item["tag"]),
                 tag_counts=tag_counts,
+                requested_difficulty=item["blueprint"].difficulty,
             )
 
         return parsed_samples
@@ -1034,7 +1096,29 @@ class Instructor:
                     force_contextual_qa=item["force_contextual_qa"],
                     generation_index=int(item["slot_id"]),
                 )
-            elif item["is_exploration"]:
+            else:
+                difficulty_reason = self.difficulty_miss_reason(sample)
+                if difficulty_reason:
+                    print(
+                        "Batch sample missed requested difficulty for "
+                        f"slot {item['slot_id']}: {difficulty_reason}. "
+                        "Falling back to single generation."
+                    )
+                    self.log_difficulty_miss(
+                        slot=slot,
+                        sample=sample,
+                        reason=difficulty_reason,
+                    )
+                    sample = self.generate_sample_for_slot(
+                        client=client,
+                        example=item["example"],
+                        slot=slot,
+                        round_tag_counts=round_tag_counts,
+                        force_contextual_qa=item["force_contextual_qa"],
+                        generation_index=int(item["slot_id"]),
+                    )
+
+            if item["is_exploration"]:
                 accepted, reason = self.should_accept_wide_variety_sample(
                     sample,
                     round_tag_counts,
@@ -1100,7 +1184,10 @@ class Instructor:
     ) -> Training_Sample:
         active_round_counts = round_tag_counts if round_tag_counts is not None else Counter()
         is_exploration = is_wide_variety_tag(slot.tag)
-        max_attempts = WIDE_VARIETY_MAX_ATTEMPTS if is_exploration else 1
+        max_attempts = max(
+            WIDE_VARIETY_MAX_ATTEMPTS if is_exploration else 1,
+            DIFFICULTY_MAX_ATTEMPTS,
+        )
         rejected_attempts: list[dict[str, str]] = []
         last_sample: Training_Sample | None = None
 
@@ -1144,8 +1231,32 @@ class Instructor:
                 instruction=instruction,
                 tag=slot.tag,
                 tag_counts=get_learning_tag_counts(self.section_id),
+                requested_difficulty=blueprint.difficulty,
             )
             last_sample = sample
+            difficulty_reason = self.difficulty_miss_reason(sample)
+            if difficulty_reason:
+                self.log_difficulty_miss(
+                    slot=slot,
+                    sample=sample,
+                    reason=difficulty_reason,
+                    attempt=attempt,
+                    accepted_after_retry_limit=attempt >= max_attempts,
+                )
+                if attempt < max_attempts:
+                    print(
+                        "Rejected sample for difficulty miss "
+                        f"on attempt {attempt}/{max_attempts}: {difficulty_reason}"
+                    )
+                    rejected_attempts.append(
+                        {
+                            "tag": sample.tag[:80],
+                            "reason": difficulty_reason[:160],
+                            "instruct": sample.instruct.replace("\n", " ")[:220],
+                            "sample": sample.sample.replace("\n", " ")[:220],
+                        }
+                    )
+                    continue
 
             if not is_exploration:
                 update_learning_tag_count(sample.tag, self.section_id)

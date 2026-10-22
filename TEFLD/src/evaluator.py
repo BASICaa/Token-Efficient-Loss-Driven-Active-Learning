@@ -74,6 +74,9 @@ class Evaluator:
             "source": evaluation.source,
             "source_ledger_id": evaluation.source_ledger_id,
             "tag": evaluation.tag,
+            "requested_difficulty": evaluation.requested_difficulty,
+            "observed_difficulty": evaluation.observed_difficulty,
+            "difficulty_score": evaluation.difficulty_score,
             "loss": loss if loss is not None else str(evaluation.loss),
             "token_length": evaluation.token_length,
             "instruct_preview": self.preview_text(evaluation.instruct),
@@ -139,6 +142,9 @@ class Evaluator:
                     round_id=self.pipeline.current_round,
                     source=evaluation.source,
                     source_ledger_id=evaluation.source_ledger_id,
+                    requested_difficulty=evaluation.requested_difficulty,
+                    observed_difficulty=evaluation.observed_difficulty,
+                    difficulty_score=evaluation.difficulty_score,
                 )
             )
 

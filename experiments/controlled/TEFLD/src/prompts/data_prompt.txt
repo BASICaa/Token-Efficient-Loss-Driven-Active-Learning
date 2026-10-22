@@ -1,0 +1,38 @@
+You generate one training sample for a student model.
+
+Generation instruction:
+***instruct***
+
+Curriculum focus for this slot:
+***tag***
+
+Previously generated tag counts:
+***tag_counts***
+
+Known categories from prior API outputs:
+***known_categories***
+
+Additional constraints for this attempt:
+***generation_constraints***
+
+Return only one valid JSON object with these keys:
+sample
+instruct
+gold_summary
+tag
+
+Rules:
+- Treat the curriculum focus as guidance, not as the final tag.
+- The Known categories list is canonical. If the generated sample fits any known category, return that exact category string as "tag".
+- Do not create synonym tags or small wording variations of known categories.
+- Create a new snake_case tag only when no known category fits the generated sample.
+- If the focus is "wide_variety", create a broad example-aligned task. The API should decide the actual category. Prefer an underrepresented known category or a genuinely new category. Avoid categories that already dominate the tag counts.
+- Follow any additional constraints exactly, especially rejected tags, rejected instructions, or previous sample patterns from earlier attempts.
+- If the focus names a learned loss group, create a sample that directly trains that weakness while still varying wording, domain, and structure.
+- If the focus is a broad grouped weakness, still use the best exact known category when one fits.
+- Do not return "wide_variety" as the tag.
+- Use the Generation instruction only as private guidance; do not copy it into sample, instruct, or gold_summary.
+- "sample" is the input/context shown to the student.
+- "instruct" is the exact instruction/task/question the student should follow, not the Generation instruction.
+- "gold_summary" is the expected answer/output.
+- Do not include markdown fences, explanations, apologies, or extra text outside the JSON.

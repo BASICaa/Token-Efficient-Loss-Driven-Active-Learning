@@ -20,7 +20,9 @@ def parse_args() -> argparse.Namespace:
     parser = argparse.ArgumentParser(
         description="Run the TEFLD active-learning loop without comparison baselines."
     )
-    parser.add_argument("--section-id", help="Existing section id, such as section_001.")
+    parser.add_argument(
+        "--section-id", help="Existing section id, such as section_001."
+    )
     parser.add_argument(
         "--new-section",
         action="store_true",
@@ -70,6 +72,30 @@ def parse_args() -> argparse.Namespace:
         help="Use deterministic tag averages instead of API semantic grouping.",
     )
     parser.add_argument(
+        "--disable-shared-validation",
+        action="store_true",
+        help=(
+            "Use training-batch loss for checkpoint decisions instead of the "
+            "fixed shared_validation.json set."
+        ),
+    )
+    parser.add_argument(
+        "--shared-validation-size",
+        type=int,
+        default=10,
+        help="Number of fixed shared-validation samples. Defaults to 10.",
+    )
+    parser.add_argument(
+        "--epochs-per-round",
+        type=float,
+        default=1.0,
+        help="LoRA training epochs per TEFLD round. Defaults to 1.",
+    )
+    parser.add_argument(
+        "--validation-file",
+        help="Freeze a local JSON validation set instead of generating validation examples; training generation may still use the API.",
+    )
+    parser.add_argument(
         "--interactive-section-selection",
         action="store_true",
         help="Choose an existing section or create a new one interactively.",
@@ -94,6 +120,10 @@ def main() -> None:
         use_api_grouping=not args.disable_api_grouping,
         interactive_section_selection=args.interactive_section_selection,
         example_format=args.example_format,
+        use_shared_validation=not args.disable_shared_validation,
+        shared_validation_size=args.shared_validation_size,
+        num_train_epochs=args.epochs_per_round,
+        validation_file=args.validation_file,
     )
 
     if args.bootstrap_only:
@@ -121,4 +151,3 @@ def main() -> None:
 
 if __name__ == "__main__":
     main()
-

@@ -1,0 +1,21 @@
+{
+  "scope": "Historical Luna generation identity copied from the October 19 pilot. Verifier stays GPT-6.1 Sol. No credentials included.",
+  "tefld_controls": {
+    "teacher_model_id": "gpt-6-luna",
+    "teacher_temperature": 1.0,
+    "generation_prompt_variant": "full",
+    "provider": {
+      "name": "hibana",
+      "base_url": "https://api-ai.hibanacloud.ir/v1",
+      "api_key_env": "HIBANA_API_KEY",
+      "currency": "toman",
+      "input_per_million": 37000,
+      "output_per_million": 184000,
+      "max_spend": 100000,
+      "pricing_source": "https://hibanacloud.ir/docs/models",
+      "pricing_checked": "2026-10-19",
+      "model_id": "gpt-6-luna",
+      "request_options": {"temperature": 1.0, "reasoning_effort": "low"}
+    }
+  }
+}
